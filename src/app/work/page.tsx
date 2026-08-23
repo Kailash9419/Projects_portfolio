@@ -69,11 +69,11 @@ export default function WorkPage() {
       {/* Header */}
       <SectionReveal direction="up">
         <div className="mb-12">
-          <span className="text-xs font-mono uppercase tracking-widest text-accent-violet">
+          <span className="text-xs font-mono uppercase tracking-widest text-accent-lime">
             Archive & Showcase
           </span>
           <h1 className="text-4xl md:text-6xl font-bold font-display tracking-tight mt-3 text-text-primary">
-            All <GradientText>Projects</GradientText>
+            All <GradientText from="from-[#A3E635]" to="to-[#22D3EE]">Projects</GradientText>
           </h1>
           <p className="text-text-secondary text-lg mt-4 max-w-2xl">
             A comprehensive collection of web applications, AI tools, SaaS products, dashboards, and experimental interfaces built with precision.

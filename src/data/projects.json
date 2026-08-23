@@ -1,0 +1,192 @@
+[
+  {
+    "id": "1",
+    "slug": "level-40-wellness",
+    "title": "Level 40 Wellness",
+    "tagline": "Wellness · E-commerce · Meal plans",
+    "description": "Dubai's first wellness-integrated café online — café dining, nutritionist-guided meal plans, retail store with cart & checkout, and workshops in one brand experience.",
+    "category": "Web Apps",
+    "year": 2024,
+    "featured": true,
+    "liveUrl": "https://level40wellness.com",
+    "coverImage": "/projects/level-40-wellness/cover.svg",
+    "screenshots": [
+      "/projects/level-40-wellness/screen-1.svg",
+      "/projects/level-40-wellness/screen-2.svg"
+    ],
+    "technologies": [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "Supabase",
+      "Stripe",
+      "Vercel"
+    ],
+    "problem": "The café was managing bookings over WhatsApp, inventory on spreadsheets, and had no online presence. Customers couldn't discover their menu or book sessions easily.",
+    "solution": "We built a sleek, mobile-first web platform with online ordering, session booking, a product store, and an owner-managed CMS — no developer needed for day-to-day updates.",
+    "features": [
+      "Online menu & ordering",
+      "Session booking system",
+      "Product catalogue & store",
+      "Customer loyalty program",
+      "Owner-managed CMS dashboard"
+    ],
+    "results": [
+      {
+        "label": "Online Orders",
+        "value": "3x"
+      },
+      {
+        "label": "Booking Rate",
+        "value": "+65%"
+      },
+      {
+        "label": "Launch Time",
+        "value": "6 weeks"
+      }
+    ],
+    "accentColor": "#A3E635"
+  },
+  {
+    "id": "2",
+    "slug": "mudkraft",
+    "title": "Mudkraft",
+    "tagline": "E-commerce · Admin CMS · WhatsApp",
+    "description": "A pottery studio taken online. The owner manages the whole catalogue from an admin panel; customers browse, add to cart and enquire directly on WhatsApp — no developer needed.",
+    "category": "E-commerce",
+    "year": 2024,
+    "featured": true,
+    "liveUrl": "https://mudkraft.com",
+    "coverImage": "/projects/mudkraft/cover.svg",
+    "screenshots": [
+      "/projects/mudkraft/screen-1.svg",
+      "/projects/mudkraft/screen-2.svg"
+    ],
+    "technologies": [
+      "Next.js",
+      "TypeScript",
+      "Node.js",
+      "MongoDB",
+      "Razorpay",
+      "Cloudinary"
+    ],
+    "problem": "The pottery artist was selling only through Instagram DMs and local markets. No way to showcase the full catalogue, handle payments online, or track orders systematically.",
+    "solution": "We designed a beautiful storefront that reflects the artisan brand, paired with a powerful admin panel for inventory, order management, and customer outreach — all owner-managed.",
+    "features": [
+      "Artisan-styled product pages",
+      "Secure online payments (Razorpay)",
+      "Order tracking & management",
+      "Admin CMS for inventory",
+      "Image gallery with Cloudinary CDN"
+    ],
+    "results": [
+      {
+        "label": "Revenue Growth",
+        "value": "2.5x"
+      },
+      {
+        "label": "Product Catalog",
+        "value": "120+"
+      }
+    ],
+    "accentColor": "#FB923C"
+  },
+  {
+    "id": "3",
+    "slug": "valley-of-birds",
+    "title": "Valley of Birds",
+    "tagline": "Travel · Admin CMS · Lead management",
+    "description": "Platform for a Kumaon bird-expedition guide — treks, gallery and social channels in one place, enquiry-to-confirmation flow, and every lead consolidated in a single view.",
+    "category": "Web Apps",
+    "year": 2023,
+    "featured": true,
+    "liveUrl": "https://valleyofbird.vercel.app",
+    "coverImage": "/uploads/1787474765366_screenshot_2026-08-23_141219.png",
+    "screenshots": [
+      "/uploads/1787474784290_screenshot_2026-08-23_141248.png",
+      "/uploads/1787474784288_screenshot_2026-08-23_141219.png",
+      "/uploads/1787504425696_screenshot_2026-08-23_222952.png"
+    ],
+    "technologies": [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Tailwind CSS",
+      "AWS S3"
+    ],
+    "problem": "The expedition company relied on word-of-mouth and basic social media. They had no system for capturing interested leads, showcasing upcoming trips, or managing bookings.",
+    "solution": "We built a visually rich platform that showcases expeditions with stunning imagery, captures leads through smart forms, and gives the owner a simple dashboard to manage trips and inquiries.",
+    "features": [
+      "Expedition showcase with rich media",
+      "Smart lead capture forms",
+      "Trip schedule management",
+      "Photo gallery with lightbox",
+      "Owner admin dashboard",
+      "Admin Dashboard",
+      "Editable treks"
+    ],
+    "results": [
+      {
+        "label": "Lead Conversion",
+        "value": "+40%"
+      },
+      {
+        "label": "Expedition Bookings",
+        "value": "2x"
+      }
+    ],
+    "accentColor": "#22D3EE"
+  },
+  {
+    "id": "4",
+    "slug": "bharat-laundry",
+    "title": "Bharat Laundry",
+    "tagline": "Service app · Admin portal · Operations",
+    "description": "Doorstep laundry app — customers schedule pickups online, the owner manages orders from an admin portal, and auto-generated cloth tags mean garments never get mixed.",
+    "category": "SaaS",
+    "year": 2024,
+    "featured": true,
+    "liveUrl": "https://bharat-laundary.vercel.app",
+    "coverImage": "/projects/bharat-laundry/cover.svg",
+    "screenshots": [
+      "/projects/bharat-laundry/screen-1.svg",
+      "/projects/bharat-laundry/screen-2.svg",
+      "/projects/bharat-laundry/screen-3.svg"
+    ],
+    "technologies": [
+      "Next.js",
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Redis",
+      "Google Maps API",
+      "Razorpay"
+    ],
+    "problem": "The laundry business was managing pickups via phone calls and WhatsApp. No tracking, no automated pricing, and frequent missed orders due to manual coordination.",
+    "solution": "We engineered a two-sided platform: a customer app for scheduling pickups with real-time tracking, and an admin portal for managing orders, assigning drivers, setting pricing rules, and monitoring operations.",
+    "features": [
+      "Customer pickup scheduling",
+      "Real-time order tracking",
+      "Driver assignment & routing",
+      "Automated pricing engine",
+      "Admin operations dashboard",
+      "Payment integration (Razorpay)"
+    ],
+    "results": [
+      {
+        "label": "Order Volume",
+        "value": "4x"
+      },
+      {
+        "label": "Missed Orders",
+        "value": "-90%"
+      },
+      {
+        "label": "Launch Time",
+        "value": "8 weeks"
+      }
+    ],
+    "accentColor": "#8B5CF6"
+  }
+]

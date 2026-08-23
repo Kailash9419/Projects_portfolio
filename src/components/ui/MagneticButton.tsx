@@ -37,28 +37,56 @@ export default function MagneticButton({ children, className, onClick, href }: M
 
   const { x: moveX, y: moveY } = getMove();
 
-  const content = (
-    <motion.button
-      ref={ref as any}
-      animate={{ x: moveX, y: moveY }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-      className={cn(
-        "relative inline-flex items-center justify-center overflow-hidden transition-colors rounded-full",
-        className
-      )}
-      onClick={onClick}
-    >
-      <span className="relative z-10">{children}</span>
-    </motion.button>
-  );
+  const sharedProps = {
+    animate: { x: moveX, y: moveY },
+    transition: { type: "spring" as const, stiffness: 150, damping: 15, mass: 0.1 },
+    className: cn(
+      "relative inline-flex items-center justify-center overflow-hidden transition-colors rounded-full",
+      className
+    ),
+  };
 
   if (href) {
+    // Check if it's an internal link
+    const isInternal = href.startsWith("/") || href.startsWith("#");
+    
+    if (isInternal) {
+      return (
+        <div ref={ref} className="inline-block">
+          <Link href={href}>
+            <motion.span
+              {...sharedProps}
+              className={cn(sharedProps.className, "cursor-pointer")}
+            >
+              <span className="relative z-10">{children}</span>
+            </motion.span>
+          </Link>
+        </div>
+      );
+    }
+
     return (
-      <Link href={href} passHref legacyBehavior>
-        {content}
-      </Link>
+      <div ref={ref} className="inline-block">
+        <motion.a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          {...sharedProps}
+        >
+          <span className="relative z-10">{children}</span>
+        </motion.a>
+      </div>
     );
   }
 
-  return content;
+  return (
+    <div ref={ref} className="inline-block">
+      <motion.button
+        {...sharedProps}
+        onClick={onClick}
+      >
+        <span className="relative z-10">{children}</span>
+      </motion.button>
+    </div>
+  );
 }

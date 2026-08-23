@@ -13,7 +13,7 @@ interface CursorGlowProps {
 }
 
 export default function CursorGlow({
-  color = "rgba(139, 92, 246, 1)", // violet-500
+  color = "rgba(163, 230, 53, 1)", // lime-400
   size = 300,
   opacity = 0.12,
   className,

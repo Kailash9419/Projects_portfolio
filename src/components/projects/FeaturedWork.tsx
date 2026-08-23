@@ -2,113 +2,61 @@ import React from "react";
 import Link from "next/link";
 import ProjectCard from "./ProjectCard";
 import { getFeaturedProjects } from "@/lib/projects";
-
-// Placeholder components if they don't exist yet
-const SectionReveal = ({ children }: { children: React.ReactNode }) => <div className="reveal">{children}</div>;
-const MagneticButton = ({ children, className }: { children: React.ReactNode, className?: string }) => <button className={className}>{children}</button>;
+import SectionReveal from "@/components/ui/SectionReveal";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 export default async function FeaturedWork() {
-  const projects = await getFeaturedProjects();
+  const allFeatured = await getFeaturedProjects();
+  
+  // Strictly filter only real, valid uploaded projects (no empty/blank ghost items)
+  const projects = (allFeatured || []).filter(
+    (p) => p && p.title && p.title.trim().length > 0
+  );
 
   if (!projects?.length) return null;
 
   return (
-    <section className="py-24">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-16">
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-text-primary mb-4">
+    <section id="featured-work" className="py-14 md:py-16 scroll-mt-20">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+        {/* Section Header */}
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-default bg-bg-card text-xs font-mono text-accent-lime mb-2.5">
+            04 — SELECTED WORK
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-3 leading-[1.2] py-0.5">
             Selected Work
           </h2>
-          <p className="text-text-secondary text-lg">
-            A curated selection of our recent projects
+          <p className="text-text-secondary text-sm sm:text-base max-w-xl">
+            Live platforms and digital products built for our clients.
           </p>
         </div>
 
-        <div className="space-y-16 md:space-y-24">
+        {/* Clean, Non-empty Project Showcase Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {projects.map((project, i) => {
-            const indexMod = i % 4;
-            
-            if (indexMod === 0) {
-              return (
-                <SectionReveal key={project.id}>
-                  <ProjectCard project={project} layout="wide" />
-                </SectionReveal>
-              );
-            }
-            
-            if (indexMod === 1) {
-              const nextProject = projects[i + 1];
-              if (nextProject) {
-                return (
-                  <SectionReveal key={project.id}>
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                      <div className="md:col-span-7">
-                        <ProjectCard project={project} layout="tall" />
-                      </div>
-                      <div className="md:col-span-5">
-                        <ProjectCard project={nextProject} layout="default" />
-                      </div>
-                    </div>
-                  </SectionReveal>
-                );
-              } else {
-                return (
-                  <SectionReveal key={project.id}>
-                    <ProjectCard project={project} layout="default" />
-                  </SectionReveal>
-                );
-              }
-            }
-            
-            if (indexMod === 2 && i > 0 && projects[i - 1]) {
-              return null; // Skip if handled in the symmetric grid step
-            }
-            
-            if (indexMod === 2 || indexMod === 3) {
-              return (
-                <SectionReveal key={project.id}>
-                  <div className="w-full relative h-[60vh] min-h-[400px] rounded-xl overflow-hidden group border border-border-default block">
-                    <div className="absolute inset-0 z-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
-                        src={project.coverImage || `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'><rect width='100%' height='100%' fill='${encodeURIComponent(project.accentColor || "#8B5CF6")}'/></svg>`}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/60 to-transparent" />
-                    </div>
-                    <div className="absolute inset-0 z-10 flex flex-col justify-end p-8 md:p-12">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="px-3 py-1 rounded-full bg-bg-tertiary/80 backdrop-blur-sm text-text-primary text-xs font-medium border border-border-default">
-                          {project.category}
-                        </span>
-                        <span className="text-text-primary/80 text-sm">{project.year}</span>
-                      </div>
-                      <h3 className="font-display text-3xl md:text-5xl font-bold text-text-primary mb-4">
-                        {project.title}
-                      </h3>
-                      <p className="text-text-primary/80 max-w-2xl text-lg mb-8 line-clamp-2">
-                        {project.tagline}
-                      </p>
-                      <Link href={`/work/${project.slug}`}>
-                         <span className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition-colors">
-                           View Project
-                         </span>
-                      </Link>
-                    </div>
-                  </div>
-                </SectionReveal>
-              );
-            }
-            return null;
+            // First item gets a wide banner card if odd count, otherwise sleek 2-col card
+            const isFirstAndOdd = i === 0 && projects.length % 2 !== 0;
+
+            return (
+              <SectionReveal
+                key={project.id || project.slug}
+                className={isFirstAndOdd ? "md:col-span-2" : "col-span-1"}
+              >
+                <ProjectCard
+                  project={project}
+                  layout={isFirstAndOdd ? "wide" : "default"}
+                />
+              </SectionReveal>
+            );
           })}
         </div>
 
-        <div className="mt-24 flex justify-center">
+        {/* Archive Button */}
+        <div className="mt-10 flex justify-center">
           <Link href="/work">
-            <MagneticButton className="px-8 py-4 rounded-full bg-bg-card border border-border-default text-text-primary hover:text-white transition-colors flex items-center gap-2 group">
-              View All Projects
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <MagneticButton className="px-6 py-3 rounded-full bg-bg-card border border-border-default text-text-primary hover:border-accent-lime/50 transition-colors flex items-center gap-2 text-xs sm:text-sm font-semibold">
+              <span>View All Projects Archive ({projects.length})</span>
+              <span>→</span>
             </MagneticButton>
           </Link>
         </div>

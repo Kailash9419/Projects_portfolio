@@ -11,15 +11,15 @@ interface GradientTextProps {
 
 export default function GradientText({
   children,
-  from = "from-violet-500",
-  to = "to-cyan-400",
+  from = "from-[#A3E635]",
+  to = "to-[#22D3EE]",
   className,
   animate = true,
 }: GradientTextProps) {
   return (
     <span
       className={cn(
-        "bg-clip-text text-transparent bg-gradient-to-r",
+        "inline-block bg-clip-text text-transparent bg-gradient-to-r py-1 leading-snug",
         from,
         to,
         animate ? "animate-gradient bg-[length:200%_auto]" : "",

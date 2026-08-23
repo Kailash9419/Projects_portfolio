@@ -1,11 +1,9 @@
 export type ProjectCategory =
-  | "Web Apps"
-  | "AI"
   | "SaaS"
-  | "Dashboard"
-  | "Mobile"
+  | "Web Apps"
+  | "E-commerce"
   | "Automation"
-  | "Experiments";
+  | "Dashboard";
 
 export type SortOption = "newest" | "oldest" | "featured";
 
@@ -44,22 +42,18 @@ export type Project = {
 };
 
 export const CATEGORIES: ProjectCategory[] = [
-  "Web Apps",
-  "AI",
   "SaaS",
-  "Dashboard",
-  "Mobile",
+  "Web Apps",
+  "E-commerce",
   "Automation",
-  "Experiments",
+  "Dashboard",
 ];
 
 export const CATEGORY_FILTER_MAP: Record<string, ProjectCategory | "All"> = {
   ALL: "All",
-  WEB: "Web Apps",
-  AI: "AI",
   SAAS: "SaaS",
-  DASHBOARDS: "Dashboard",
-  MOBILE: "Mobile",
+  WEB: "Web Apps",
+  ECOMMERCE: "E-commerce",
   AUTOMATION: "Automation",
-  EXPERIMENTS: "Experiments",
+  DASHBOARDS: "Dashboard",
 };

@@ -1,17 +1,12 @@
-// Generate placeholder project cover images as SVG files
+// Generate placeholder project cover images as SVG files for devlabs projects
 const fs = require('fs');
 const path = require('path');
 
 const projects = [
-  { slug: 'nexus-ai', title: 'Nexus AI', color1: '#8B5CF6', color2: '#22D3EE', screens: 3 },
-  { slug: 'cloudsync', title: 'CloudSync', color1: '#22D3EE', color2: '#3B82F6', screens: 2 },
-  { slug: 'pixel-studio', title: 'Pixel Studio', color1: '#F472B6', color2: '#8B5CF6', screens: 3 },
-  { slug: 'datapulse', title: 'DataPulse', color1: '#FB923C', color2: '#F472B6', screens: 2 },
-  { slug: 'swiftcart', title: 'SwiftCart', color1: '#A3E635', color2: '#22D3EE', screens: 2 },
-  { slug: 'autoflow', title: 'AutoFlow', color1: '#22D3EE', color2: '#8B5CF6', screens: 3 },
-  { slug: 'chromatic', title: 'Chromatic', color1: '#F472B6', color2: '#FB923C', screens: 2 },
-  { slug: 'devportal', title: 'DevPortal', color1: '#8B5CF6', color2: '#3B82F6', screens: 2 },
-  { slug: 'hyperscale', title: 'HyperScale', color1: '#A3E635', color2: '#22D3EE', screens: 2 },
+  { slug: 'level-40-wellness', title: 'Level 40 Wellness', color1: '#A3E635', color2: '#22D3EE', screens: 2 },
+  { slug: 'mudkraft', title: 'Mudkraft', color1: '#FB923C', color2: '#F472B6', screens: 2 },
+  { slug: 'valley-of-birds', title: 'Valley of Birds', color1: '#22D3EE', color2: '#8B5CF6', screens: 2 },
+  { slug: 'bharat-laundry', title: 'Bharat Laundry', color1: '#8B5CF6', color2: '#22D3EE', screens: 3 },
 ];
 
 function createSVG(title, color1, color2, width = 1200, height = 675) {
@@ -38,7 +33,7 @@ function createSVG(title, color1, color2, width = 1200, height = 675) {
     <circle cx="${width - 100}" cy="60" r="20" fill="white" opacity="0.2"/>
   </g>
   <text x="${width/2}" y="${height/2 + 10}" font-family="system-ui, sans-serif" font-size="32" font-weight="700" fill="white" text-anchor="middle" opacity="0.9">${title}</text>
-  <text x="${width/2}" y="${height/2 + 50}" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="middle" opacity="0.5">Project Preview</text>
+  <text x="${width/2}" y="${height/2 + 50}" font-family="system-ui, sans-serif" font-size="14" fill="white" text-anchor="middle" opacity="0.5">devlabs Project Preview</text>
 </svg>`;
 }
 
@@ -89,10 +84,13 @@ function createScreenSVG(title, color1, color2, screenNum, width = 1200, height 
 projects.forEach(p => {
   const dir = path.join(__dirname, 'public', 'projects', p.slug);
 
+  // Ensure directory exists
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
   // Cover image
   const coverSvg = createSVG(p.title, p.color1, p.color2);
-  // Save as .webp extension but SVG content (browsers will still render)
-  // Actually save as SVG and we reference it
   fs.writeFileSync(path.join(dir, 'cover.svg'), coverSvg);
 
   // Screenshots

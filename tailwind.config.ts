@@ -23,9 +23,10 @@ const config: Config = {
           muted: "#6B7280",
         },
         accent: {
-          violet: "#8B5CF6",
-          cyan: "#22D3EE",
+          primary: "#A3E635",
           lime: "#A3E635",
+          cyan: "#22D3EE",
+          violet: "#8B5CF6",
           orange: "#FB923C",
           pink: "#F472B6",
         },
@@ -35,8 +36,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-syne)", "sans-serif"],
-        body: ["var(--font-inter)", "sans-serif"],
+        display: ["var(--font-syne)", "var(--font-devanagari)", "sans-serif"],
+        body: ["var(--font-inter)", "var(--font-devanagari)", "sans-serif"],
+        devanagari: ["var(--font-devanagari)", "var(--font-inter)", "sans-serif"],
       },
       animation: {
         "gradient-shift": "gradient-shift 6s ease infinite",

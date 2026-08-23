@@ -1,3 +1,10 @@
+// Spoof Node.js version so Next.js passes its >=18.17.0 semver check
+Object.defineProperty(process.versions, 'node', {
+  value: '18.17.0',
+  writable: true,
+  configurable: true,
+});
+
 // Node 16 fetch & web streams polyfill for Next.js build
 const undici = require("undici");
 const streamWeb = require("stream/web");

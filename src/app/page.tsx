@@ -1,9 +1,12 @@
 import Hero from "@/components/hero/Hero";
-import FeaturedWork from "@/components/projects/FeaturedWork";
+import BusinessSolutionFinder from "@/components/sections/BusinessSolutionFinder";
 import WhatWeBuild from "@/components/sections/WhatWeBuild";
+import FeaturedWork from "@/components/projects/FeaturedWork";
+import PlatformComparison from "@/components/sections/PlatformComparison";
 import OurProcess from "@/components/sections/OurProcess";
-import TechStack from "@/components/sections/TechStack";
-import MoreProjects from "@/components/sections/MoreProjects";
+import WhyDevLabs from "@/components/sections/WhyDevLabs";
+import PricingDiscussion from "@/components/sections/PricingDiscussion";
+import ShopkeeperFAQ from "@/components/sections/ShopkeeperFAQ";
 import About from "@/components/sections/About";
 import Contact from "@/components/sections/Contact";
 
@@ -11,11 +14,14 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <FeaturedWork />
+      <BusinessSolutionFinder />
       <WhatWeBuild />
-      <MoreProjects />
+      <FeaturedWork />
+      <PlatformComparison />
       <OurProcess />
-      <TechStack />
+      <WhyDevLabs />
+      <PricingDiscussion />
+      <ShopkeeperFAQ />
       <About />
       <Contact />
     </>
