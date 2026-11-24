@@ -1,31 +1,19 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 import { getAllProjects } from "@/lib/projects";
+import { SEO } from "@/data/brand";
 
-const BASE_URL = "https://devlabs.studio"; // Update when domain is live
-
-export default function sitemap(): MetadataRoute.Sitemap {
-  const projects = getAllProjects();
-
-  const projectUrls = projects.map((project) => ({
-    url: `${BASE_URL}/work/${project.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const projects = await getAllProjects();
+  const now = new Date();
 
   return [
-    {
-      url: BASE_URL,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${BASE_URL}/work`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    ...projectUrls,
+    { url: SEO.siteUrl, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    { url: `${SEO.siteUrl}/work`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    ...projects.map((project) => ({
+      url: `${SEO.siteUrl}/work/${project.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
   ];
 }

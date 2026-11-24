@@ -8,13 +8,11 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import { CONTACT } from "@/data/brand";
 
 interface ProjectPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const projects = getAllProjects();
+  const projects = await getAllProjects();
   return projects.map((p) => ({
     slug: p.slug,
   }));
@@ -23,27 +21,36 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
-  const project = getProjectBySlug(params.slug);
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
   if (!project) {
     return {
       title: "Project Not Found | DevLabs",
     };
   }
 
+  const image = project.coverImage?.endsWith(".svg") ? undefined : project.coverImage;
   return {
     title: `${project.title} — ${project.tagline} | DevLabs`,
     description: project.description,
+    alternates: { canonical: `/work/${project.slug}` },
+    openGraph: {
+      title: `${project.title} | DevLabs`,
+      description: project.tagline,
+      ...(image ? { images: [image] } : {}),
+    },
   };
 }
 
-export default function ProjectDetailPage({ params }: ProjectPageProps) {
-  const project = getProjectBySlug(params.slug);
+export default async function ProjectDetailPage({ params }: ProjectPageProps) {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     notFound();
   }
 
-  const { prev, next } = getAdjacentProjects(params.slug);
+  const { prev, next } = await getAdjacentProjects(slug);
   const accentColor = project.accentColor || "#A3E635";
   const allMedia = [
     project.coverImage,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Project, ProjectCategory, CATEGORIES } from "@/types/project";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -17,24 +17,34 @@ export default function ProjectFormModal({
   onSave,
   projectToEdit,
 }: ProjectFormModalProps) {
-  const [formData, setFormData] = useState<Partial<Project>>({
-    title: "",
-    tagline: "",
-    description: "",
-    category: "Web Apps",
-    year: new Date().getFullYear(),
-    featured: false,
-    coverImage: "/placeholder-project.svg",
-    screenshots: [],
-    technologies: [],
-    problem: "",
-    solution: "",
-    features: [],
-    results: [],
-    accentColor: "#A3E635",
-    liveUrl: "",
-    githubUrl: "",
-  });
+  const [formData, setFormData] = useState<Partial<Project>>(() =>
+    projectToEdit
+      ? {
+          ...projectToEdit,
+          screenshots: projectToEdit.screenshots || [],
+          technologies: projectToEdit.technologies || [],
+          features: projectToEdit.features || [],
+          results: projectToEdit.results || [],
+        }
+      : {
+          title: "",
+          tagline: "",
+          description: "",
+          category: "Web Apps",
+          year: new Date().getFullYear(),
+          featured: true,
+          coverImage: "",
+          screenshots: [],
+          technologies: ["Next.js", "TypeScript", "Tailwind CSS"],
+          problem: "",
+          solution: "",
+          features: [],
+          results: [],
+          accentColor: "#A3E635",
+          liveUrl: "",
+          githubUrl: "",
+        }
+  );
 
   const [techInput, setTechInput] = useState("");
   const [featureInput, setFeatureInput] = useState("");
@@ -48,37 +58,6 @@ export default function ProjectFormModal({
   const coverFileRef = useRef<HTMLInputElement>(null);
   const screenshotFileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (projectToEdit) {
-      setFormData({
-        ...projectToEdit,
-        screenshots: projectToEdit.screenshots || [],
-        technologies: projectToEdit.technologies || [],
-        features: projectToEdit.features || [],
-        results: projectToEdit.results || [],
-      });
-    } else {
-      setFormData({
-        title: "",
-        tagline: "",
-        description: "",
-        category: "Web Apps",
-        year: new Date().getFullYear(),
-        featured: true,
-        coverImage: "",
-        screenshots: [],
-        technologies: ["Next.js", "TypeScript", "Tailwind CSS"],
-        problem: "",
-        solution: "",
-        features: [],
-        results: [],
-        accentColor: "#A3E635",
-        liveUrl: "",
-        githubUrl: "",
-      });
-    }
-    setError("");
-  }, [projectToEdit, isOpen]);
 
   if (!isOpen) return null;
 
@@ -90,9 +69,9 @@ export default function ProjectFormModal({
   ) => {
     if (!file) return;
 
-    // Check size (< 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Image size should be less than 10MB");
+    // Server limit is 4 MB (Vercel request body cap)
+    if (file.size > 4 * 1024 * 1024) {
+      setError("Image size should be less than 4 MB");
       return;
     }
 
@@ -114,9 +93,9 @@ export default function ProjectFormModal({
       }
 
       onSuccess(json.url);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Upload error:", err);
-      setError(err?.message || "Image upload failed");
+      setError(err instanceof Error ? err.message : "Image upload failed");
     } finally {
       setLoading(false);
     }
@@ -216,8 +195,8 @@ export default function ProjectFormModal({
     try {
       await onSave(formData);
       onClose();
-    } catch (err: any) {
-      setError(err?.message || "Failed to save project");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save project");
     } finally {
       setIsSubmitting(false);
     }
@@ -379,7 +358,7 @@ export default function ProjectFormModal({
                   type="file"
                   ref={coverFileRef}
                   onChange={handleCoverSelect}
-                  accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif"
+                  accept="image/png, image/jpeg, image/webp, image/gif, image/avif"
                   className="hidden"
                 />
 
@@ -447,7 +426,7 @@ export default function ProjectFormModal({
                   ref={screenshotFileRef}
                   onChange={handleScreenshotSelect}
                   multiple
-                  accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif"
+                  accept="image/png, image/jpeg, image/webp, image/gif, image/avif"
                   className="hidden"
                 />
 

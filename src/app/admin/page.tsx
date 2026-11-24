@@ -18,23 +18,7 @@ export default function AdminPage() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Check auth on load
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("/api/admin/auth");
-      const data = await res.json();
-      setIsAuthenticated(data.authenticated);
-      if (data.authenticated) {
-        fetchProjects();
-      }
-    } catch (err) {
-      setIsAuthenticated(false);
-    }
-  };
+  const [status, setStatus] = useState<{ configured: boolean; storage: string } | null>(null);
 
   const fetchProjects = async () => {
     setIsLoading(true);
@@ -50,6 +34,26 @@ export default function AdminPage() {
       setIsLoading(false);
     }
   };
+
+  // Check auth on load
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/auth");
+        const data = await res.json();
+        if (cancelled) return;
+        setStatus({ configured: data.configured, storage: data.storage });
+        setIsAuthenticated(data.authenticated);
+        if (data.authenticated) fetchProjects();
+      } catch {
+        if (!cancelled) setIsAuthenticated(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -73,7 +77,7 @@ export default function AdminPage() {
       } else {
         setLoginError(data.error || "Invalid password");
       }
-    } catch (err) {
+    } catch {
       setLoginError("Login failed. Check server connection.");
     } finally {
       setIsLoggingIn(false);
@@ -116,7 +120,7 @@ export default function AdminPage() {
         );
         showToast("Featured status updated!");
       }
-    } catch (err) {
+    } catch {
       showToast("Failed to toggle featured status");
     }
   };
@@ -133,7 +137,7 @@ export default function AdminPage() {
       } else {
         alert(data.error || "Failed to delete");
       }
-    } catch (err) {
+    } catch {
       alert("Failed to delete project");
     }
   };
@@ -168,6 +172,13 @@ export default function AdminPage() {
               Enter admin password to manage your portfolio projects
             </p>
           </div>
+
+          {status && !status.configured && (
+            <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs leading-relaxed">
+              Admin login is disabled until <code>ADMIN_PASSWORD</code> and{" "}
+              <code>ADMIN_SESSION_SECRET</code> (32+ characters) are set in the environment.
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             {loginError && (
@@ -233,6 +244,13 @@ export default function AdminPage() {
         )}
       </AnimatePresence>
 
+      {status?.storage === "none" && (
+        <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm">
+          Changes can&apos;t be saved yet: connect a Vercel Blob store to this project so{" "}
+          <code>BLOB_READ_WRITE_TOKEN</code> is set, then redeploy.
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-border-default mb-8">
         <div>
@@ -240,7 +258,13 @@ export default function AdminPage() {
             <span className="px-2.5 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime text-xs font-mono">
               ADMIN CONTROL PANEL
             </span>
-            <span className="text-xs text-text-muted">Live Sync Active</span>
+            <span className="text-xs text-text-muted">
+              {status?.storage === "blob"
+                ? "Cloud storage connected"
+                : status?.storage === "local"
+                  ? "Local file storage (development)"
+                  : "Storage not configured"}
+            </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-display text-text-primary">
             Project Management
@@ -418,6 +442,7 @@ export default function AdminPage() {
 
       {/* Project Form Modal (Add / Edit) */}
       <ProjectFormModal
+        key={isModalOpen ? editingProject?.id ?? "new" : "closed"}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);

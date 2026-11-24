@@ -29,6 +29,7 @@ const devanagari = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SEO.siteUrl),
   title: SEO.defaultTitle,
   description: SEO.defaultDescription,
   keywords: [...SEO.keywords],
@@ -40,20 +41,11 @@ export const metadata: Metadata = {
     siteName: BRAND.fullName,
     title: SEO.defaultTitle,
     description: SEO.defaultDescription,
-    images: [
-      {
-        url: `${SEO.siteUrl}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: `${BRAND.fullName} — ${LOCATION.shortLabel}`,
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: SEO.defaultTitle,
     description: SEO.defaultDescription,
-    images: [`${SEO.siteUrl}/og-image.png`],
   },
   robots: {
     index: true,
@@ -89,7 +81,7 @@ const jsonLd = {
     "Web Design",
   ],
   priceRange: "₹₹",
-  image: `${SEO.siteUrl}/og-image.png`,
+  image: `${SEO.siteUrl}/opengraph-image`,
 };
 
 export default function RootLayout({

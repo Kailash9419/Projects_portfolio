@@ -16,17 +16,16 @@ interface MagneticButtonProps {
 
 export default function MagneticButton({ children, className, onClick, href }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const { x, y, isInside } = useRelativeMousePosition(ref);
+  const { x, y, width, height, isInside } = useRelativeMousePosition(ref);
   const prefersReducedMotion = useReducedMotion();
 
   const isMagnetic = isInside && !prefersReducedMotion;
   
   // Calculate movement based on cursor position relative to center
   const getMove = () => {
-    if (!isMagnetic || !ref.current) return { x: 0, y: 0 };
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+    if (!isMagnetic || !width || !height) return { x: 0, y: 0 };
+    const centerX = width / 2;
+    const centerY = height / 2;
     
     // Max movement is 4px
     const moveX = ((x - centerX) / centerX) * 4;

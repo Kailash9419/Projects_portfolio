@@ -1,12 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import SectionReveal from "@/components/ui/SectionReveal";
 import GradientText from "@/components/ui/GradientText";
+import QuickInquiryModal from "@/components/ui/QuickInquiryModal";
 import { useLanguage } from "@/context/LanguageContext";
+import { CONTACT } from "@/data/brand";
 
 export default function Contact() {
   const { t } = useLanguage();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <section id="contact" className="max-w-4xl mx-auto px-5 sm:px-6 py-16 md:py-20 text-center border-t border-border-default/60 scroll-mt-20 relative">
@@ -33,7 +36,33 @@ export default function Contact() {
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
           <span>24h Response Time · Direct Developer Consultation</span>
         </div>
+
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-accent-lime text-bg-primary font-bold text-sm hover:bg-accent-lime/90 transition-colors"
+          >
+            {t.inquiryModal.submitBtn}
+          </button>
+          <a
+            href={CONTACT.whatsapp.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[#25D366] font-bold text-sm hover:bg-[#25D366]/20 transition-colors"
+          >
+            WhatsApp {CONTACT.whatsapp.displayNumber}
+          </a>
+          <a
+            href={`mailto:${CONTACT.email}`}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full border border-border-default text-text-secondary text-sm hover:text-text-primary hover:border-accent-lime/50 transition-colors"
+          >
+            {CONTACT.email}
+          </a>
+        </div>
       </SectionReveal>
+
+      <QuickInquiryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 }

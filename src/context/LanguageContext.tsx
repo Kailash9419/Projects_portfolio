@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useSyncExternalStore } from "react";
 import { Language, TRANSLATIONS } from "@/data/translations";
 
 interface LanguageContextType {
@@ -11,27 +11,43 @@ interface LanguageContextType {
   isHindi: boolean;
 }
 
+const STORAGE_KEY = "devlabs_lang";
+const listeners = new Set<() => void>();
+let memoryLanguage: Language | null = null;
+
+function readLanguage(): Language {
+  if (memoryLanguage) return memoryLanguage;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === "en" || saved === "hi") return saved;
+  } catch {
+    // ignore
+  }
+  return "en";
+}
+
+function subscribeLanguage(onChange: () => void) {
+  listeners.add(onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    listeners.delete(onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("devlabs_lang") as Language;
-      if (saved === "en" || saved === "hi") {
-        setLanguageState(saved);
-      }
-    } catch (e) {
-      // ignore
-    }
-  }, []);
+  const language = useSyncExternalStore(subscribeLanguage, readLanguage, () => "en" as Language);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
+    memoryLanguage = lang;
     try {
-      localStorage.setItem("devlabs_lang", lang);
-    } catch (e) {}
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      // storage unavailable (private mode) — keep in memory only
+    }
+    listeners.forEach((l) => l());
   };
 
   const toggleLanguage = () => {

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import SectionReveal from "@/components/ui/SectionReveal";
 import GradientText from "@/components/ui/GradientText";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -10,7 +9,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { CONTACT } from "@/data/brand";
 
 export default function PricingDiscussion() {
-  const { t, isHindi } = useLanguage();
+  const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const PILLARS = [

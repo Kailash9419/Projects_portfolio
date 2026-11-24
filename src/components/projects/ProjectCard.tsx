@@ -15,7 +15,7 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, layout = "default" }: ProjectCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const { x, y, isInside } = useRelativeMousePosition(cardRef);
+  const { x, y, width, height, isInside } = useRelativeMousePosition(cardRef);
   const shouldReduceMotion = useReducedMotion();
 
   const isWide = layout === "wide";
@@ -55,7 +55,7 @@ export default function ProjectCard({ project, layout = "default" }: ProjectCard
           )}>
             <motion.div
               className="w-full h-full relative"
-              animate={!shouldReduceMotion && isInside ? { x: (x - (cardRef.current?.clientWidth || 0)/2) * 0.02, y: (y - (cardRef.current?.clientHeight || 0)/2) * 0.02 } : { x: 0, y: 0 }}
+              animate={!shouldReduceMotion && isInside ? { x: (x - width / 2) * 0.02, y: (y - height / 2) * 0.02 } : { x: 0, y: 0 }}
               transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
             >
               <Image
