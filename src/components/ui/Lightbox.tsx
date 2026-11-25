@@ -17,9 +17,17 @@ export default function Lightbox({ images, initialIndex, isOpen, onClose }: Ligh
   const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
   const prefersReducedMotion = useReducedMotion();
 
+  // Reset to the requested image whenever the lightbox (re)opens.
+  const [openedWith, setOpenedWith] = React.useState<number | null>(null);
+  if (isOpen && openedWith !== initialIndex) {
+    setOpenedWith(initialIndex);
+    setCurrentIndex(initialIndex);
+  } else if (!isOpen && openedWith !== null) {
+    setOpenedWith(null);
+  }
+
   useEffect(() => {
     if (isOpen) {
-      setCurrentIndex(initialIndex);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";

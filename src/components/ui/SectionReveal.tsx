@@ -18,7 +18,7 @@ export default function SectionReveal({
   className,
   delay = 0,
   direction = "up",
-  blur = false,
+  blur: _blur = false, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: SectionRevealProps) {
   const prefersReducedMotion = useReducedMotion();
 

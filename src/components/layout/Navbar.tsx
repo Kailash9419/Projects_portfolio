@@ -17,7 +17,7 @@ export default function Navbar() {
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
-  const { language, setLanguage, toggleLanguage, t, isHindi } = useLanguage();
+  const { setLanguage, toggleLanguage, t, isHindi } = useLanguage();
 
   const NAV_LINKS = [
     { label: t.nav.work, href: "/work" },

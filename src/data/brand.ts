@@ -34,9 +34,6 @@ export const SOCIAL = {
     url: "https://instagram.com/devlabs.studio",
     handle: "@devlabs.studio",
   },
-  github: { url: "#", handle: "" },
-  twitter: { url: "#", handle: "" },
-  linkedin: { url: "#", handle: "" },
 } as const;
 
 export const STATS = [
@@ -76,7 +73,7 @@ export const WHY_DEVLABS = [
 ] as const;
 
 export const SEO = {
-  siteUrl: "https://devlabs.studio",
+  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://devlabs.studio").replace(/\/$/, ""),
   defaultTitle: "DevLabs — Software Studio | Haldwani, Uttarakhand",
   defaultDescription:
     "DevLabs is a product studio for small businesses. We design and build SaaS platforms, websites, and automation tools — owner-managed, no developer needed.",

@@ -22,12 +22,21 @@ export function useMousePosition(): MousePosition {
   return position;
 }
 
+/** Cursor position relative to the element, plus the element's size. */
+export type RelativeMousePosition = MousePosition & {
+  width: number;
+  height: number;
+  isInside: boolean;
+};
+
 export function useRelativeMousePosition(
   ref: React.RefObject<HTMLElement | null>
-): MousePosition & { isInside: boolean } {
-  const [state, setState] = useState<MousePosition & { isInside: boolean }>({
+): RelativeMousePosition {
+  const [state, setState] = useState<RelativeMousePosition>({
     x: 0,
     y: 0,
+    width: 0,
+    height: 0,
     isInside: false,
   });
 
@@ -41,7 +50,7 @@ export function useRelativeMousePosition(
       const y = e.clientY - rect.top;
       const isInside =
         x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
-      setState({ x, y, isInside });
+      setState({ x, y, width: rect.width, height: rect.height, isInside });
     };
 
     const handleMouseLeave = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Project, ProjectCategory, CATEGORIES } from "@/types/project";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -17,24 +17,34 @@ export default function ProjectFormModal({
   onSave,
   projectToEdit,
 }: ProjectFormModalProps) {
-  const [formData, setFormData] = useState<Partial<Project>>({
-    title: "",
-    tagline: "",
-    description: "",
-    category: "Web Apps",
-    year: new Date().getFullYear(),
-    featured: false,
-    coverImage: "/placeholder-project.svg",
-    screenshots: [],
-    technologies: [],
-    problem: "",
-    solution: "",
-    features: [],
-    results: [],
-    accentColor: "#A3E635",
-    liveUrl: "",
-    githubUrl: "",
-  });
+  const [formData, setFormData] = useState<Partial<Project>>(() =>
+    projectToEdit
+      ? {
+          ...projectToEdit,
+          screenshots: projectToEdit.screenshots || [],
+          technologies: projectToEdit.technologies || [],
+          features: projectToEdit.features || [],
+          results: projectToEdit.results || [],
+        }
+      : {
+          title: "",
+          tagline: "",
+          description: "",
+          category: "Web Apps",
+          year: new Date().getFullYear(),
+          featured: true,
+          coverImage: "",
+          screenshots: [],
+          technologies: ["Next.js", "TypeScript", "Tailwind CSS"],
+          problem: "",
+          solution: "",
+          features: [],
+          results: [],
+          accentColor: "#A3E635",
+          liveUrl: "",
+          githubUrl: "",
+        }
+  );
 
   const [techInput, setTechInput] = useState("");
   const [featureInput, setFeatureInput] = useState("");
@@ -48,47 +58,16 @@ export default function ProjectFormModal({
   const coverFileRef = useRef<HTMLInputElement>(null);
   const screenshotFileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (projectToEdit) {
-      setFormData({
-        ...projectToEdit,
-        screenshots: projectToEdit.screenshots || [],
-        technologies: projectToEdit.technologies || [],
-        features: projectToEdit.features || [],
-        results: projectToEdit.results || [],
-      });
-    } else {
-      setFormData({
-        title: "",
-        tagline: "",
-        description: "",
-        category: "Web Apps",
-        year: new Date().getFullYear(),
-        featured: true,
-        coverImage: "",
-        screenshots: [],
-        technologies: ["Next.js", "TypeScript", "Tailwind CSS"],
-        problem: "",
-        solution: "",
-        features: [],
-        results: [],
-        accentColor: "#A3E635",
-        liveUrl: "",
-        githubUrl: "",
-      });
-    }
-    setError("");
-  }, [projectToEdit, isOpen]);
 
   if (!isOpen) return null;
 
   // ─── Client-side image compression (Canvas API) ─────────────────────────
-  // Resizes & re-encodes the image so the resulting base64 stays well under
-  // Vercel's 4.5 MB serverless payload limit when the project JSON is saved.
+  // Downscales large photos and re-encodes them so uploads stay under the
+  // server's 4 MB limit (Vercel caps request bodies at 4.5 MB).
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
-      // Skip compression for SVG (they are text, already small)
-      if (file.type === "image/svg+xml") {
+      // GIFs would lose animation; anything else unusual is left to the server check.
+      if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
         resolve(file);
         return;
       }
@@ -99,12 +78,18 @@ export default function ProjectFormModal({
       img.onload = () => {
         URL.revokeObjectURL(url);
 
-        // Max dimensions: 1200×900 for cover, keeps quality fine for display
-        const MAX_W = 1200;
-        const MAX_H = 900;
+        const MAX_W = 1920;
+        const MAX_H = 1440;
         let { width, height } = img;
+        const needsResize = width > MAX_W || height > MAX_H;
 
-        if (width > MAX_W || height > MAX_H) {
+        // Small images are uploaded untouched.
+        if (!needsResize && file.size <= 1024 * 1024) {
+          resolve(file);
+          return;
+        }
+
+        if (needsResize) {
           const ratio = Math.min(MAX_W / width, MAX_H / height);
           width = Math.round(width * ratio);
           height = Math.round(height * ratio);
@@ -113,27 +98,35 @@ export default function ProjectFormModal({
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Encode as JPEG at 80% quality (~10× smaller than PNG)
-        const mimeOut = file.type === "image/png" ? "image/jpeg" : file.type;
+        // WebP stays WebP (keeps transparency); PNG/JPEG become JPEG.
+        const mimeOut = file.type === "image/webp" ? "image/webp" : "image/jpeg";
+        const extOut = mimeOut === "image/webp" ? ".webp" : ".jpg";
         canvas.toBlob(
           (blob) => {
-            if (!blob) { resolve(file); return; }
-            const compressed = new File(
-              [blob],
-              file.name.replace(/\.(png|jpg|jpeg|webp|gif)$/i, ".jpg"),
-              { type: mimeOut }
+            if (!blob || blob.size >= file.size) {
+              resolve(file);
+              return;
+            }
+            resolve(
+              new File([blob], file.name.replace(/\.[^.]+$/, "") + extOut, { type: mimeOut })
             );
-            resolve(compressed);
           },
           mimeOut,
-          0.8
+          0.82
         );
       };
 
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
       img.src = url;
     });
   };
@@ -149,6 +142,9 @@ export default function ProjectFormModal({
 
     // Compress on client before sending — keeps payload well under Vercel 4.5MB limit
     const compressed = await compressImage(file);
+    if (compressed.size > 4 * 1024 * 1024) {
+      throw new Error(`"${file.name}" is still over 4 MB after compression. Try a smaller image.`);
+    }
 
     const data = new FormData();
     data.append("file", compressed);
@@ -461,7 +457,7 @@ export default function ProjectFormModal({
                   type="file"
                   ref={coverFileRef}
                   onChange={handleCoverSelect}
-                  accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif"
+                  accept="image/png, image/jpeg, image/webp, image/gif, image/avif"
                   className="hidden"
                 />
 
@@ -529,7 +525,7 @@ export default function ProjectFormModal({
                   ref={screenshotFileRef}
                   onChange={handleScreenshotSelect}
                   multiple
-                  accept="image/png, image/jpeg, image/webp, image/svg+xml, image/gif"
+                  accept="image/png, image/jpeg, image/webp, image/gif, image/avif"
                   className="hidden"
                 />
 

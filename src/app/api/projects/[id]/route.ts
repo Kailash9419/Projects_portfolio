@@ -1,94 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { saveProject, deleteProject, toggleFeaturedProject } from "@/lib/server/projectStore";
-import { checkAdminAuth } from "@/lib/server/auth";
+import { requireAdmin } from "@/lib/server/auth";
+import { errorResponse, invalidateProjects } from "@/lib/server/respond";
 
-export const dynamic = "force-dynamic";
+type Ctx = { params: Promise<{ id: string }> };
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  if (!checkAdminAuth()) {
-    return NextResponse.json(
-      { success: false, error: "Unauthorized. Admin login required." },
-      { status: 401 }
-    );
-  }
+export async function PUT(request: NextRequest, { params }: Ctx) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   try {
-    const body = await request.json();
-    const updated = await saveProject({ ...body, id: params.id });
-    revalidatePath("/", "layout");
-    revalidatePath("/work");
-    revalidatePath(`/work/${updated.slug}`);
-    revalidatePath("/", "layout");
-    revalidatePath("/work");
-    return NextResponse.json({ success: true, project: updated });
+    const { id } = await params;
+    const project = await saveProject({ ...(await request.json()), id });
+    invalidateProjects();
+    return NextResponse.json({ success: true, project });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Failed to update project" },
-      { status: 500 }
-    );
+    return errorResponse(error, "Failed to update project");
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  if (!checkAdminAuth()) {
-    return NextResponse.json(
-      { success: false, error: "Unauthorized. Admin login required." },
-      { status: 401 }
-    );
-  }
+export async function PATCH(_request: NextRequest, { params }: Ctx) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   try {
-    const updated = await toggleFeaturedProject(params.id);
-    if (!updated) {
-      return NextResponse.json(
-        { success: false, error: "Project not found" },
-        { status: 404 }
-      );
+    const project = await toggleFeaturedProject((await params).id);
+    if (!project) {
+      return NextResponse.json({ success: false, error: "Project not found" }, { status: 404 });
     }
-    revalidatePath("/", "layout");
-    revalidatePath("/work");
-    return NextResponse.json({ success: true, project: updated });
+    invalidateProjects();
+    return NextResponse.json({ success: true, project });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Failed to toggle featured status" },
-      { status: 500 }
-    );
+    return errorResponse(error, "Failed to toggle featured status");
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  if (!checkAdminAuth()) {
-    return NextResponse.json(
-      { success: false, error: "Unauthorized. Admin login required." },
-      { status: 401 }
-    );
-  }
+export async function DELETE(_request: NextRequest, { params }: Ctx) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   try {
-    const deleted = await deleteProject(params.id);
+    const deleted = await deleteProject((await params).id);
     if (!deleted) {
-      return NextResponse.json(
-        { success: false, error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Project not found" }, { status: 404 });
     }
-    revalidatePath("/", "layout");
-    revalidatePath("/work");
-    return NextResponse.json({ success: true, message: "Project deleted successfully" });
+    invalidateProjects();
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Failed to delete project" },
-      { status: 500 }
-    );
+    return errorResponse(error, "Failed to delete project");
   }
 }

@@ -1,22 +1,18 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { readProjects } from "@/lib/server/projectStore";
+import { getAllProjects, getProjectBySlug, getAdjacentProjects } from "@/lib/projects";
 import TechBadge from "@/components/projects/TechBadge";
 import SectionReveal from "@/components/ui/SectionReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { CONTACT } from "@/data/brand";
 
-export const dynamic = "force-dynamic";
-
 interface ProjectPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const projects = await readProjects();
+  const projects = await getAllProjects();
   return projects.map((p) => ({
     slug: p.slug,
   }));
@@ -25,31 +21,36 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
-  const projects = await readProjects();
-  const project = projects.find((p) => p.slug === params.slug);
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
   if (!project) {
     return {
       title: "Project Not Found | DevLabs",
     };
   }
 
+  const image = project.coverImage?.endsWith(".svg") ? undefined : project.coverImage;
   return {
     title: `${project.title} — ${project.tagline} | DevLabs`,
     description: project.description,
+    alternates: { canonical: `/work/${project.slug}` },
+    openGraph: {
+      title: `${project.title} | DevLabs`,
+      description: project.tagline,
+      ...(image ? { images: [image] } : {}),
+    },
   };
 }
 
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
-  const projects = await readProjects();
-  const index = projects.findIndex((p) => p.slug === params.slug);
-  const project = index !== -1 ? projects[index] : undefined;
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     notFound();
   }
 
-  const prev = index > 0 ? projects[index - 1] : null;
-  const next = index < projects.length - 1 ? projects[index + 1] : null;
+  const { prev, next } = await getAdjacentProjects(slug);
   const accentColor = project.accentColor || "#A3E635";
   const allMedia = [
     project.coverImage,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useSyncExternalStore } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -11,8 +11,11 @@ export default function InteractiveBackground() {
   const prefersReducedMotion = useReducedMotion();
   const isDesktop = useMediaQuery("(pointer: fine)");
   
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   // Smooth spring-based cursor following
   const springX = useSpring(useMotionValue(0), { stiffness: 50, damping: 20 });

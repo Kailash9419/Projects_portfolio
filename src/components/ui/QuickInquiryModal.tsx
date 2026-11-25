@@ -27,24 +27,43 @@ export default function QuickInquiryModal({ isOpen, onClose }: QuickInquiryModal
     projectType: "",
     message: "",
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [website, setWebsite] = useState(""); // honeypot — real users never see it
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const whatsappUrl = `${CONTACT.whatsapp.link}?text=${encodeURIComponent(
+    `Hi ${BRAND.name}! 👋
+
+Name: ${formData.name}
+Phone: ${formData.phone}
+Requirement: ${
+      formData.projectType || "General Inquiry"
+    }
+Details: ${formData.message || "Looking to discuss project scope & pricing."}`
+  )}`;
+
+  const handleClose = () => {
+    if (state === "sent") {
+      setFormData({ name: "", phone: "", projectType: "", message: "" });
+    }
+    setState("idle");
+    onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const msg = `Hi ${BRAND.name}! 👋\n\nName: ${formData.name}\nPhone: ${formData.phone}\nRequirement: ${formData.projectType || "General Inquiry"}\nDetails: ${formData.message || "Looking to discuss project scope & pricing."}`;
-
-    window.open(
-      `${CONTACT.whatsapp.link}?text=${encodeURIComponent(msg)}`,
-      "_blank"
-    );
-
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      onClose();
-    }, 1500);
+    setState("sending");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, website, language: isHindi ? "hi" : "en" }),
+      });
+      setState(res.ok ? "sent" : "error");
+    } catch {
+      setState("error");
+    }
   };
 
   const inputClasses =
@@ -54,7 +73,7 @@ export default function QuickInquiryModal({ isOpen, onClose }: QuickInquiryModal
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
         {/* Backdrop click to close */}
-        <div className="fixed inset-0" onClick={onClose} />
+        <div className="fixed inset-0" onClick={handleClose} />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -68,7 +87,7 @@ export default function QuickInquiryModal({ isOpen, onClose }: QuickInquiryModal
 
           {/* Close button */}
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-5 right-5 w-8 h-8 rounded-full border border-border-default flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-primary transition-colors text-sm"
             aria-label="Close"
           >
@@ -88,8 +107,38 @@ export default function QuickInquiryModal({ isOpen, onClose }: QuickInquiryModal
             </p>
           </div>
 
-          {/* Form */}
+          {state === "sent" ? (
+            <div className="text-center py-6" role="status">
+              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-accent-lime/15 border border-accent-lime/40 flex items-center justify-center text-2xl text-accent-lime">
+                ✓
+              </div>
+              <h3 className="text-xl font-bold font-display text-text-primary">
+                {t.inquiryModal.sentTitle}
+              </h3>
+              <p className="text-sm text-text-muted mt-2">{t.inquiryModal.sentDesc}</p>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-6 text-sm text-[#25D366] hover:underline"
+              >
+                {t.inquiryModal.whatsappAlt}
+              </a>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
+            {/* Honeypot field for bots */}
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="hidden"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+
             <div>
               <label className="block text-xs font-mono uppercase text-text-muted mb-1.5">
                 {t.inquiryModal.nameLabel} *
@@ -156,26 +205,36 @@ export default function QuickInquiryModal({ isOpen, onClose }: QuickInquiryModal
               />
             </div>
 
+            {state === "error" && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs" role="alert">
+                {t.inquiryModal.errorMsg}
+              </div>
+            )}
+
             <motion.button
               type="submit"
+              disabled={state === "sending"}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               className="w-full py-3.5 px-6 rounded-xl bg-accent-lime text-bg-primary font-bold text-sm shadow-xl shadow-accent-lime/25 hover:bg-accent-lime/90 transition-all flex items-center justify-center gap-2 mt-6"
             >
-              {isSubmitted ? (
-                <span>{t.inquiryModal.submitting}</span>
-              ) : (
-                <>
-                  <span>💬</span>
-                  <span>{t.inquiryModal.submitBtn}</span>
-                </>
-              )}
+              {state === "sending" ? t.inquiryModal.submitting : t.inquiryModal.submitBtn}
             </motion.button>
 
-            <p className="text-[11px] text-center text-text-muted pt-2">
-              🔒 100% Free Consultation · No Spam · Direct WhatsApp Reply
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center text-xs text-[#25D366] hover:underline"
+            >
+              {t.inquiryModal.whatsappAlt}
+            </a>
+
+            <p className="text-[11px] text-center text-text-muted pt-1">
+              🔒 100% Free Consultation · No Spam
             </p>
           </form>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>
