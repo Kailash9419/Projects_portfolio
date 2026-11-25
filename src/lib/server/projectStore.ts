@@ -128,8 +128,15 @@ export async function saveProject(input: ProjectInput & { id?: string }): Promis
   if (input.id && !existing) throw new ValidationError(`Project ${input.id} not found`);
 
   const data = sanitize(input, existing);
-  if (list.some((p) => p.slug === data.slug && p.id !== input.id)) {
-    throw new ValidationError(`Another project already uses the slug "${data.slug}".`);
+  const slugTaken = (slug: string) => list.some((p) => p.slug === slug && p.id !== input.id);
+  if (slugTaken(data.slug)) {
+    if (existing) {
+      throw new ValidationError(`Another project already uses the slug "${data.slug}".`);
+    }
+    // New project with a duplicate title: suffix the slug instead of failing.
+    let n = 2;
+    while (slugTaken(`${data.slug}-${n}`)) n++;
+    data.slug = `${data.slug}-${n}`;
   }
 
   let saved: Project;

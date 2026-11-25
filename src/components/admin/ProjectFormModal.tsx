@@ -61,71 +61,160 @@ export default function ProjectFormModal({
 
   if (!isOpen) return null;
 
-  // File Upload Helper
-  const handleFileUpload = async (
-    file: File,
-    onSuccess: (url: string) => void,
-    setLoading: (loading: boolean) => void
-  ) => {
-    if (!file) return;
-
-    // Server limit is 4 MB (Vercel request body cap)
-    if (file.size > 4 * 1024 * 1024) {
-      setError("Image size should be less than 4 MB");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = new FormData();
-      data.append("file", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: data,
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Failed to upload image");
+  // ─── Client-side image compression (Canvas API) ─────────────────────────
+  // Downscales large photos and re-encodes them so uploads stay under the
+  // server's 4 MB limit (Vercel caps request bodies at 4.5 MB).
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      // GIFs would lose animation; anything else unusual is left to the server check.
+      if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+        resolve(file);
+        return;
       }
 
-      onSuccess(json.url);
-    } catch (err) {
-      console.error("Upload error:", err);
-      setError(err instanceof Error ? err.message : "Image upload failed");
-    } finally {
-      setLoading(false);
-    }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+
+        const MAX_W = 1920;
+        const MAX_H = 1440;
+        let { width, height } = img;
+        const needsResize = width > MAX_W || height > MAX_H;
+
+        // Small images are uploaded untouched.
+        if (!needsResize && file.size <= 1024 * 1024) {
+          resolve(file);
+          return;
+        }
+
+        if (needsResize) {
+          const ratio = Math.min(MAX_W / width, MAX_H / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // WebP stays WebP (keeps transparency); PNG/JPEG become JPEG.
+        const mimeOut = file.type === "image/webp" ? "image/webp" : "image/jpeg";
+        const extOut = mimeOut === "image/webp" ? ".webp" : ".jpg";
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || blob.size >= file.size) {
+              resolve(file);
+              return;
+            }
+            resolve(
+              new File([blob], file.name.replace(/\.[^.]+$/, "") + extOut, { type: mimeOut })
+            );
+          },
+          mimeOut,
+          0.82
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+      img.src = url;
+    });
   };
 
-  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(
-        file,
-        (url) => setFormData((prev) => ({ ...prev, coverImage: url })),
-        setIsUploadingCover
+  // File Upload Helper
+  const handleFileUpload = async (
+    file: File
+  ): Promise<string> => {
+    // Check raw size before compression (< 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      throw new Error(`"${file.name}" is larger than 20MB`);
+    }
+
+    // Compress on client before sending — keeps payload well under Vercel 4.5MB limit
+    const compressed = await compressImage(file);
+    if (compressed.size > 4 * 1024 * 1024) {
+      throw new Error(`"${file.name}" is still over 4 MB after compression. Try a smaller image.`);
+    }
+
+    const data = new FormData();
+    data.append("file", compressed);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: data,
+    });
+
+    const rawText = await res.text();
+    let json: { success?: boolean; url?: string; error?: string } = {};
+    try {
+      json = JSON.parse(rawText);
+    } catch {
+      throw new Error(
+        res.ok
+          ? "Invalid server response while uploading image"
+          : `Upload failed (${res.status}): ${rawText.slice(0, 120) || res.statusText}`
       );
     }
+
+    if (!res.ok || !json.success || !json.url) {
+      throw new Error(json.error || "Failed to upload image");
+    }
+
+    return json.url;
   };
 
-  const handleScreenshotSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setIsUploadingCover(true);
+    setError("");
+    try {
+      const url = await handleFileUpload(file);
+      setFormData((prev) => ({ ...prev, coverImage: url }));
+    } catch (err: unknown) {
+      console.error("Cover upload error:", err);
+      setError(err instanceof Error ? err.message : "Cover image upload failed");
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
+
+  const handleScreenshotSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files && files.length > 0) {
-      Array.from(files).forEach((file) => {
-        handleFileUpload(
-          file,
-          (url) =>
-            setFormData((prev) => ({
-              ...prev,
-              screenshots: [...(prev.screenshots || []), url],
-            })),
-          setIsUploadingScreenshot
-        );
-      });
+    if (!files || files.length === 0) return;
+
+    const fileList = Array.from(files);
+    e.target.value = "";
+
+    setIsUploadingScreenshot(true);
+    setError("");
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of fileList) {
+        const url = await handleFileUpload(file);
+        uploadedUrls.push(url);
+      }
+      setFormData((prev) => ({
+        ...prev,
+        screenshots: [...(prev.screenshots || []), ...uploadedUrls],
+      }));
+    } catch (err: unknown) {
+      console.error("Screenshot upload error:", err);
+      setError(err instanceof Error ? err.message : "Screenshot upload failed");
+    } finally {
+      setIsUploadingScreenshot(false);
     }
   };
 
@@ -186,16 +275,26 @@ export default function ProjectFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploadingCover || isUploadingScreenshot) {
+      setError("Please wait for image uploads to finish before saving.");
+      return;
+    }
     if (!formData.title?.trim() || !formData.tagline?.trim()) {
       setError("Please provide a project title and tagline.");
       return;
     }
+    const normalizedLiveUrl = formData.liveUrl?.trim()
+      ? /^https?:\/\//i.test(formData.liveUrl.trim())
+        ? formData.liveUrl.trim()
+        : `https://${formData.liveUrl.trim()}`
+      : "";
+
     setIsSubmitting(true);
     setError("");
     try {
-      await onSave(formData);
+      await onSave({ ...formData, liveUrl: normalizedLiveUrl });
       onClose();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save project");
     } finally {
       setIsSubmitting(false);
@@ -671,10 +770,16 @@ export default function ProjectFormModal({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingCover || isUploadingScreenshot}
               className="px-6 py-2.5 rounded-xl bg-accent-lime text-bg-primary font-bold hover:bg-accent-lime/90 transition-all text-sm shadow-lg shadow-accent-lime/20 disabled:opacity-50"
             >
-              {isSubmitting ? "Saving..." : projectToEdit ? "Update Project" : "Publish Project"}
+              {isUploadingCover || isUploadingScreenshot
+                ? "Uploading images..."
+                : isSubmitting
+                ? "Saving..."
+                : projectToEdit
+                ? "Update Project"
+                : "Publish Project"}
             </button>
           </div>
         </motion.div>
