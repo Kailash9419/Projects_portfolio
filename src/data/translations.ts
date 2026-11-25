@@ -1,258 +1,234 @@
 export type Language = "en" | "hi";
 
-export const TRANSLATIONS = {
-  en: {
-    nav: {
-      work: "Work",
-      services: "Services",
-      whyUs: "Why DevLabs",
-      pricing: "Pricing",
-      contact: "Contact",
-      accepting: "Available for new builds",
-      whatsAppUs: "WhatsApp Us",
-      quickInquiry: "Quick Inquiry",
-      adminLogin: "Admin CMS",
-    },
-    hero: {
-      tag: "Software Studio · Haldwani, Uttarakhand",
-      headlineLine1: "Software that lets",
-      headlineStroke: "small business",
-      headlineLine2: "work like",
-      headlineAccent: "big business.",
-      description:
-        "DevLabs is a product studio for small businesses. We design and build custom websites, SaaS platforms, and automated business tools — owner-managed from simple phone panels, so running them never requires a developer.",
-      ctaWhatsApp: "💬 Discuss on WhatsApp",
-      ctaWork: "View Selected Work ↓",
-      ctaInquiry: "⚡ Quick Free Quote",
-      livePreview: "⚡ LIVE DEMO",
-      todaySales: "Today's Online Sales",
-      ordersProcessed: "Orders Processed",
-      directBank: "Direct into Bank / UPI",
-      autoReceipt: "Auto-receipt sent",
-      livePaymentStream: "Live Payment Stream (UPI / QR)",
-      instantAlert: "Instant Alert",
-      testOrderBtn: "⚡ Click to test instant live order alert",
-      orderReceived: "✓ +₹2,450 Received!",
-      tabStore: "Online Dukan & UPI",
-      tabOwner: "Phone Se Control",
-      tabWhatsApp: "WhatsApp Bot",
-      bottomTrust1: "100% Owner Managed",
-      bottomTrust2: "Fast 2-4 Wk Delivery",
-      bottomTrust3: "Local & Direct Support",
-      stats: {
-        products: "Products Shipped",
-        live: "Live in the Wild",
-        focus: "Small-Business Focus",
-        response: "Response Time",
-      },
-    },
-    services: {
-      badge: "01 — WHAT WE DO",
-      title: "Products that work as",
-      titleAccent: "hard as you do.",
-      subtitle: "From single landing pages to full-scale SaaS platforms and business automation flows.",
-      saasTitle: "SaaS Products",
-      saasDesc: "Subscription-ready web products: multi-tenant platforms, payments & billing, dashboards and admin panels, deployed on scalable cloud.",
-      webTitle: "Websites & Web Apps",
-      webDesc: "Fast, modern websites and web apps: landing pages, e-commerce, booking systems, customer portals — SEO-ready and mobile-first.",
-      autoTitle: "Business Automation",
-      autoDesc: "Workflows that run themselves: invoicing, inventory, CRM & lead capture, WhatsApp and email flows, integrations between your tools.",
-    },
-    process: {
-      badge: "02 — HOW WE WORK",
-      title: "From idea to launch in",
-      titleAccent: "4 clear steps.",
-      subtitle: "No surprises, no endless meetings. Just transparent execution and weekly demos.",
-      step1Title: "Discover",
-      step1Desc: "Free consultation to understand your business, workflow bottlenecks, and growth goals.",
-      step2Title: "Design",
-      step2Desc: "Interactive designs and click-through prototypes before a single line of code is written.",
-      step3Title: "Build",
-      step3Desc: "Short sprints with weekly demos — real progress visible at every milestone.",
-      step4Title: "Launch & Support",
-      step4Desc: "Deploy, train your team on the owner admin panel, and stay on for ongoing improvements.",
-    },
-    whyUs: {
-      badge: "03 — WHY DEVLABS",
-      title: "Built for peace of mind.",
-      titleAccent: "Engineered for growth.",
-      subtitle: "We bridge the gap between complex tech and everyday business operations — no jargon, no endless delays, no developer lock-in.",
-      pillar1Title: "You stay in control",
-      pillar1Desc: "Every product ships with a simple admin panel — the software is yours, the content is yours, no developer needed day-to-day.",
-      pillar2Title: "No surprises",
-      pillar2Desc: "Fixed scopes, clear pricing and weekly demos. You always know exactly where your project stands at every milestone.",
-      pillar3Title: "Built to last",
-      pillar3Desc: "Stable, widely-adopted technology — fast today, maintainable for years, and we stay on for support and growth.",
-    },
-    selectedWork: {
-      badge: "04 — SELECTED WORK",
-      title: "Selected Work",
-      subtitle: "A curated selection of our recent shipped client platforms",
-      viewAll: "View All Projects →",
-    },
-    pricing: {
-      badge: "💡 FAIR & TRANSPARENT PRICING",
-      title: "How our pricing works:",
-      titleAccent: "Decided after discussion.",
-      subtitle: "Every shop, startup, and business has unique goals. Instead of confusing packages with useless features, we calculate a transparent, fair quote based strictly on your project scope and timeline.",
-      pillar1Title: "100% Custom to Your Business",
-      pillar1Desc: "A local café needs a booking/menu system, while a manufacturer needs lead management. We don't push one-size-fits-all overpriced packages.",
-      pillar2Title: "Decided Transparently After Discussion",
-      pillar2Desc: "In our 15-minute free consultation, we identify exactly what tech you need to get more customers and quote a fair, fixed price.",
-      pillar3Title: "Zero Hidden Fees & Milestone Payments",
-      pillar3Desc: "No monthly lock-in fees or surprise costs. The code and admin panel are 100% yours, with flexible milestone payments upon demo approval.",
-      ctaWhatsApp: "💬 Get Free Project Estimate on WhatsApp →",
-      ctaInquiry: "⚡ Open Quick Inquiry Modal",
-    },
-    contact: {
-      badge: "05 — GET IN TOUCH",
-      title: "Have an idea worth automating?",
-      titleAccent: "Let's talk.",
-      subtitle: "Tell us about your business — we reply within 24 hours with honest advice on what to build, and what not to.",
-      ctaModal: "⚡ Open Quick Inquiry Form →",
-      ctaWhatsApp: "💬 Chat Directly on WhatsApp",
-    },
-    inquiryModal: {
-      title: "Quick Project Inquiry",
-      subtitle: "Share your requirements — we'll call or WhatsApp you back within 24 hours.",
-      nameLabel: "Your Name",
-      phoneLabel: "Phone / WhatsApp Number",
-      projectTypeLabel: "Select Project Type",
-      detailsLabel: "Tell us about your project...",
-      submitBtn: "Send Inquiry →",
-      submitting: "Sending...",
-      sentTitle: "Inquiry received!",
-      sentDesc: "Thanks — we'll get back to you within 24 hours.",
-      errorMsg: "Couldn't send right now. Please message us on WhatsApp instead.",
-      whatsappAlt: "Prefer WhatsApp? Chat directly →",
-      close: "Close",
-    },
+/**
+ * All UI copy. Deliberately minimal: the site itself is the portfolio piece,
+ * so words only appear where an interaction can't say it.
+ */
+type Copy = {
+  nav: { work: string; services: string; process: string; contact: string; cta: string; available: string; menu: string };
+  hero: { kicker: string; line1: string; line2: string; ctaPrimary: string; ctaSecondary: string; hint: string };
+  services: { index: string; label: string; items: { word: string; line: string }[] };
+  manifesto: { base: string[]; reveal: string[]; hint: string };
+  work: { index: string; label: string; title: string; all: string; visit: string };
+  numbers: { value: string; label: string }[];
+  process: { index: string; label: string; steps: { title: string; when: string }[] };
+  contact: { index: string; label: string; title: string; titleAccent: string; lede: string; orReach: string };
+  form: {
+    name: string;
+    namePlaceholder: string;
+    phone: string;
+    type: string;
+    typePlaceholder: string;
+    types: string[];
+    details: string;
+    detailsPlaceholder: string;
+    submit: string;
+    sending: string;
+    sentTitle: string;
+    sentDesc: string;
+    error: string;
+    whatsapp: string;
+  };
+  playground: { hint: string; tapHint: string; tags: string[] };
+  footer: { rights: string; built: string };
+  workPage: { title: string; titleAccent: string; search: string; all: string; empty: string; sort: { featured: string; newest: string; oldest: string } };
+  caseStudy: {
+    back: string;
+    challenge: string;
+    solution: string;
+    delivered: string;
+    stack: string;
+    live: string;
+    similar: string;
+    next: string;
+    prev: string;
+  };
+};
+
+const en: Copy = {
+  nav: { work: "Work", services: "Services", process: "Process", contact: "Contact", cta: "Start a project", available: "Booking new builds", menu: "Menu" },
+  hero: {
+    kicker: "Software studio · Haldwani, India",
+    line1: "We build software",
+    line2: "that sells.",
+    ctaPrimary: "Start a project",
+    ctaSecondary: "See the work",
+    hint: "Move your cursor through it",
   },
-  hi: {
-    nav: {
-      work: "प्रोजेक्ट्स",
-      services: "सर्विसेज",
-      whyUs: "हमारे बारे में",
-      pricing: "प्राइसिंग",
-      contact: "संपर्क करें",
-      accepting: "नए प्रोजेक्ट्स के लिए उपलब्ध",
-      whatsAppUs: "व्हाट्सएप करें",
-      quickInquiry: "क्विक इन्क्वायरी",
-      adminLogin: "एडमिन",
-    },
-    hero: {
-      tag: "सॉफ्टवेयर स्टूडियो · हल्द्वानी, उत्तराखंड",
-      headlineLine1: "सॉफ्टवेयर जो",
-      headlineStroke: "छोटे बिज़नेस को",
-      headlineLine2: "बनाए",
-      headlineAccent: "मार्केट लीडर।",
-      description:
-        "DevLabs छोटे व्यापारियों और स्टार्टअप्स के लिए कस्टम वेबसाइट्स, ऑनलाइन दुकान और ऑटोमेशन टूल्स बनाता है — जिन्हें आप अपने फोन से आसानी से संभाल सकते हैं, बिना किसी कोडिंग या डेवलपर के।",
-      ctaWhatsApp: "💬 व्हाट्सएप पर बात करें",
-      ctaWork: "हमारे काम देखें ↓",
-      ctaInquiry: "⚡ फ्री एस्टीमेट लें",
-      livePreview: "⚡ लाइव डेमो",
-      todaySales: "आज की ऑनलाइन बिक्री",
-      ordersProcessed: "सफल ऑर्डर्स",
-      directBank: "सीधे बैंक / UPI में",
-      autoReceipt: "ऑटो-रसीद भेजी गई",
-      livePaymentStream: "लाइव पेमेंट अलर्ट (UPI / QR)",
-      instantAlert: "तुरंत सूचना",
-      testOrderBtn: "⚡ लाइव ऑर्डर टेस्ट करने के लिए क्लिक करें",
-      orderReceived: "✓ +₹2,450 प्राप्त हुए!",
-      tabStore: "ऑनलाइन दुकान & UPI",
-      tabOwner: "फोन से पूरा कंट्रोल",
-      tabWhatsApp: "व्हाट्सएप बॉट",
-      bottomTrust1: "100% ओनर कंट्रोल",
-      bottomTrust2: "2-4 हफ्ते में लाइव",
-      bottomTrust3: "लोकल व डायरेक्ट सपोर्ट",
-      stats: {
-        products: "प्रोजेक्ट्स डिलीवर किए",
-        live: "सफल एक्टिव प्रोडक्ट्स",
-        focus: "लोकल बिज़नेस फोकस",
-        response: "रिस्पॉन्स टाइम",
-      },
-    },
-    services: {
-      badge: "01 — हम क्या बनाते हैं",
-      title: "सॉफ्टवेयर जो आपके काम को",
-      titleAccent: "बनाए सुपरफास्ट।",
-      subtitle: "साधारण वेबसाइट्स से लेकर फुल ऑनलाइन स्टोर, बुकिंग सिस्टम और व्हाट्सएप ऑटोमेशन तक।",
-      saasTitle: "SaaS & वेब प्लेटफॉर्म",
-      saasDesc: "सब्सक्रिप्शन और बिलिंग वाले कस्टम वेब सॉफ्टवेयर, डैशबोर्ड्स और क्लाउड पर चलने वाले पावरफुल टूल्स।",
-      webTitle: "वेबसाइट्स & ऑनलाइन स्टोर",
-      webDesc: "फास्ट, मोबाइल-फ्रेंडली वेबसाइट्स: ई-कॉमर्स, डॉक्टर/होटल बुकिंग, कैटलॉग और Google SEO रेडी।",
-      autoTitle: "बिज़नेस ऑटोमेशन",
-      autoDesc: "अपने आप चलने वाले सिस्टम: बिलिंग, इन्वेंटरी, व्हाट्सएप इंक्वायरी बॉट और कस्टमर फॉलो-अप।",
-    },
-    process: {
-      badge: "02 — काम करने का तरीका",
-      title: "आइडिया से लॉन्च तक",
-      titleAccent: "4 आसान स्टेप्स में।",
-      subtitle: "कोई लंबा इंतज़ार नहीं, हर हफ्ते लाइव डेमो और पूरी पारदर्शिता।",
-      step1Title: "डिस्कवरी (बातचीत)",
-      step1Desc: "15 मिनट की फ्री कॉल में आपके बिज़नेस की जरूरत और कस्टमर की समस्या समझना।",
-      step2Title: "डिज़ाइन",
-      step2Desc: "कोडिंग से पहले आपकी पसंद का सुंदर और आसान डिज़ाइन दिखाना।",
-      step3Title: "बिल्ड (कोडिंग)",
-      step3Desc: "हर हफ्ते लाइव डेमो के साथ तेजी से सॉफ्टवेयर तैयार करना।",
-      step4Title: "लॉन्च & सपोर्ट",
-      step4Desc: "वेबसाइट लाइव करना, आपको फोन से चलाना सिखाना और आगे भी पूरा सपोर्ट देना।",
-    },
-    whyUs: {
-      badge: "03 — DEVLABS ही क्यों?",
-      title: "पूरा कंट्रोल आपके हाथ में,",
-      titleAccent: "ग्रोथ आपके बिज़नेस की।",
-      subtitle: "हम मुश्किल टेक्निकल बातों को आसान बनाते हैं — कोई छुपा हुआ चार्ज नहीं, कोई डेवलपर पर निर्भरता नहीं।",
-      pillar1Title: "कंट्रोल आपके पास रहेगा",
-      pillar1Desc: "हर वेबसाइट के साथ आसान मोबाइल पैनल मिलता है — रेट बदलना, फोटो डालना सब आपके हाथ में।",
-      pillar2Title: "कोई सरप्राइज या छुपा खर्च नहीं",
-      pillar2Desc: "फिक्स्ड बजट, तय समय और वीकली डेमो। आपको हमेशा पता रहता है कि काम कहाँ तक पहुंचा।",
-      pillar3Title: "लंबे समय के लिए मजबूत टेक",
-      pillar3Desc: "लेटेस्ट और सिक्योर टेक्नोलॉजी जो सालों-साल बिना अटके चले, साथ में हमारा परमानेंट सपोर्ट।",
-    },
-    selectedWork: {
-      badge: "04 — हमारे पिछले काम",
-      title: "सफल प्रोजेक्ट्स",
-      subtitle: "लोकल व ग्लोबल क्लाइंट्स के लिए बनाए गए कुछ बेहतरीन प्रोडक्ट्स",
-      viewAll: "सभी प्रोजेक्ट्स देखें →",
-    },
-    pricing: {
-      badge: "💡 पारदर्शी व सही प्राइसिंग",
-      title: "हमारी प्राइसिंग का तरीका:",
-      titleAccent: "बातचीत के बाद तय होती है।",
-      subtitle: "हर दुकान और बिज़नेस की जरूरत अलग होती है। इसलिए हम कोई फालतू महँगे पैकेज थोपने के बजाय, पहले 15 मिनट आपकी जरूरत समझकर बिल्कुल सही व फिक्स बजट बताते हैं।",
-      pillar1Title: "100% आपकी जरूरत के मुताबिक",
-      pillar1Desc: "एक रेस्टोरेंट को मेनू/बुकिंग चाहिए, तो ट्रेवल वाले को लीड्स। हम सिर्फ काम की चीज़ का चार्ज लेते हैं।",
-      pillar2Title: "बातचीत के बाद पारदर्शी कोटेशन",
-      pillar2Desc: "फ्री डिस्कशन के बाद काम का दायरा, डिलीवरी टाइम (2-4 हफ्ते) और फिक्स प्राइस फाइनल होता है।",
-      pillar3Title: "जीरो हिडन चार्ज व माइलस्टोन पेमेंट",
-      pillar3Desc: "कोई हर महीने का जबरन चार्ज नहीं। वेबसाइट आपकी है, कोड आपका है, और पेमेंट काम के साथ-साथ।",
-      ctaWhatsApp: "💬 व्हाट्सएप पर फ्री एस्टीमेट लें →",
-      ctaInquiry: "⚡ क्विक इन्क्वायरी फॉर्म खोलें",
-    },
-    contact: {
-      badge: "05 — संपर्क करें",
-      title: "क्या आपके पास भी कोई बिज़नेस आइडिया है?",
-      titleAccent: "आइए बात करते हैं।",
-      subtitle: "अपने बिज़नेस के बारे में बताइए — हम 24 घंटे के अंदर सही और ईमानदार सलाह देंगे।",
-      ctaModal: "⚡ क्विक इन्क्वायरी फॉर्म भरें →",
-      ctaWhatsApp: "💬 डायरेक्ट व्हाट्सएप पर चैट करें",
-    },
-    inquiryModal: {
-      title: "क्विक प्रोजेक्ट इन्क्वायरी",
-      subtitle: "अपनी डिटेल्स भरें — हम 24 घंटे के अंदर कॉल या व्हाट्सएप पर आपसे संपर्क करेंगे।",
-      nameLabel: "आपका नाम",
-      phoneLabel: "फोन / व्हाट्सएप नंबर",
-      projectTypeLabel: "प्रोजेक्ट का प्रकार चुनें",
-      detailsLabel: "अपने बिज़नेस या प्रोजेक्ट के बारे में थोड़ा बताएं...",
-      submitBtn: "इन्क्वायरी भेजें →",
-      submitting: "भेजा जा रहा है...",
-      sentTitle: "इन्क्वायरी मिल गई!",
-      sentDesc: "धन्यवाद — हम 24 घंटे के अंदर आपसे संपर्क करेंगे।",
-      errorMsg: "अभी भेजा नहीं जा सका। कृपया व्हाट्सएप पर मैसेज करें।",
-      whatsappAlt: "व्हाट्सएप पसंद है? सीधे चैट करें →",
-      close: "बंद करें",
-    },
+  services: {
+    index: "01",
+    label: "What we build",
+    items: [
+      { word: "Stores", line: "Sell online. UPI straight to your bank." },
+      { word: "Bookings", line: "Rooms, tables, slots. Zero commission." },
+      { word: "SaaS", line: "Dashboards, billing, teams." },
+      { word: "Automation", line: "WhatsApp does the follow-up." },
+    ],
+  },
+  manifesto: {
+    base: ["Templates are", "someone else's", "business."],
+    reveal: ["Your code.", "Your data.", "₹0 a month."],
+    hint: "Look closer",
+  },
+  work: { index: "02", label: "Selected work", title: "Work", all: "All projects", visit: "Live" },
+  numbers: [
+    { value: "2–4", label: "Weeks to launch" },
+    { value: "₹0", label: "Monthly fees" },
+    { value: "100%", label: "Yours to own" },
+    { value: "24h", label: "Reply time" },
+  ],
+  process: {
+    index: "03",
+    label: "Process",
+    steps: [
+      { title: "Discover", when: "Day 1" },
+      { title: "Design", when: "Week 1" },
+      { title: "Build", when: "Weeks 1–4" },
+      { title: "Launch", when: "Then we stay" },
+    ],
+  },
+  contact: {
+    index: "04",
+    label: "Contact",
+    title: "Let's",
+    titleAccent: "talk.",
+    lede: "Free consultation. Reply within 24 hours.",
+    orReach: "Or directly",
+  },
+  form: {
+    name: "Name",
+    namePlaceholder: "Rahul Sharma",
+    phone: "Phone / WhatsApp",
+    type: "Need",
+    typePlaceholder: "Choose one",
+    types: ["Online store", "Website", "Booking system", "SaaS / dashboard", "WhatsApp automation", "Something else"],
+    details: "Anything else?",
+    detailsPlaceholder: "A line or two about your business",
+    submit: "Send",
+    sending: "Sending…",
+    sentTitle: "Got it.",
+    sentDesc: "We'll call or WhatsApp you within 24 hours.",
+    error: "Couldn't send. Try WhatsApp instead.",
+    whatsapp: "WhatsApp instead",
+  },
+  playground: {
+    hint: "Go on, throw them",
+    tapHint: "Tap to shake them",
+    tags: ["Stores", "Bookings", "SaaS", "Automation", "UPI", "WhatsApp", "Next.js", "Admin panels", "SEO", "₹0/mo", "Haldwani", "Dashboards"],
+  },
+  footer: { rights: "All rights reserved.", built: "Designed & built in Haldwani" },
+  workPage: {
+    title: "All",
+    titleAccent: "work.",
+    search: "Search",
+    all: "All",
+    empty: "Nothing matches.",
+    sort: { featured: "Featured", newest: "Newest", oldest: "Oldest" },
+  },
+  caseStudy: {
+    back: "All work",
+    challenge: "Problem",
+    solution: "Build",
+    delivered: "Delivered",
+    stack: "Stack",
+    live: "Visit live site",
+    similar: "Want one?",
+    next: "Next",
+    prev: "Previous",
   },
 };
+
+const hi: Copy = {
+  nav: { work: "काम", services: "सर्विसेज", process: "प्रोसेस", contact: "संपर्क", cta: "प्रोजेक्ट शुरू करें", available: "नए प्रोजेक्ट्स ले रहे हैं", menu: "मेनू" },
+  hero: {
+    kicker: "सॉफ्टवेयर स्टूडियो · हल्द्वानी",
+    line1: "हम ऐसा सॉफ्टवेयर बनाते हैं",
+    line2: "जो बिक्री बढ़ाए।",
+    ctaPrimary: "प्रोजेक्ट शुरू करें",
+    ctaSecondary: "हमारा काम",
+    hint: "कर्सर घुमाकर देखिए",
+  },
+  services: {
+    index: "01",
+    label: "हम क्या बनाते हैं",
+    items: [
+      { word: "दुकान", line: "ऑनलाइन बेचें। UPI सीधे बैंक में।" },
+      { word: "बुकिंग", line: "रूम, टेबल, स्लॉट। 0% कमीशन।" },
+      { word: "SaaS", line: "डैशबोर्ड, बिलिंग, टीम।" },
+      { word: "ऑटोमेशन", line: "फॉलो-अप व्हाट्सएप करेगा।" },
+    ],
+  },
+  manifesto: {
+    base: ["टेम्पलेट", "किसी और का", "बिज़नेस है।"],
+    reveal: ["आपका कोड।", "आपका डेटा।", "₹0 महीना।"],
+    hint: "करीब से देखिए",
+  },
+  work: { index: "02", label: "चुनिंदा काम", title: "काम", all: "सभी प्रोजेक्ट्स", visit: "लाइव" },
+  numbers: [
+    { value: "2–4", label: "हफ्ते में लॉन्च" },
+    { value: "₹0", label: "मंथली फीस" },
+    { value: "100%", label: "मालिकाना हक" },
+    { value: "24h", label: "में जवाब" },
+  ],
+  process: {
+    index: "03",
+    label: "प्रोसेस",
+    steps: [
+      { title: "बातचीत", when: "पहला दिन" },
+      { title: "डिज़ाइन", when: "पहला हफ्ता" },
+      { title: "बिल्ड", when: "हफ्ते 1–4" },
+      { title: "लॉन्च", when: "फिर भी साथ" },
+    ],
+  },
+  contact: {
+    index: "04",
+    label: "संपर्क",
+    title: "बात",
+    titleAccent: "करें।",
+    lede: "फ्री सलाह। 24 घंटे में जवाब।",
+    orReach: "या सीधे",
+  },
+  form: {
+    name: "नाम",
+    namePlaceholder: "राहुल शर्मा",
+    phone: "फोन / व्हाट्सएप",
+    type: "ज़रूरत",
+    typePlaceholder: "एक चुनें",
+    types: ["ऑनलाइन दुकान", "वेबसाइट", "बुकिंग सिस्टम", "SaaS / डैशबोर्ड", "व्हाट्सएप ऑटोमेशन", "कुछ और"],
+    details: "और कुछ?",
+    detailsPlaceholder: "अपने बिज़नेस के बारे में एक-दो लाइन",
+    submit: "भेजें",
+    sending: "भेजा जा रहा है…",
+    sentTitle: "मिल गया।",
+    sentDesc: "हम 24 घंटे में कॉल या व्हाट्सएप करेंगे।",
+    error: "भेजा नहीं जा सका। व्हाट्सएप करें।",
+    whatsapp: "व्हाट्सएप करें",
+  },
+  playground: {
+    hint: "चलिए, उछालिए",
+    tapHint: "टैप करके हिलाइए",
+    tags: ["दुकान", "बुकिंग", "SaaS", "ऑटोमेशन", "UPI", "WhatsApp", "Next.js", "एडमिन पैनल", "SEO", "₹0/महीना", "हल्द्वानी", "डैशबोर्ड"],
+  },
+  footer: { rights: "सर्वाधिकार सुरक्षित।", built: "हल्द्वानी में बना" },
+  workPage: {
+    title: "सारा",
+    titleAccent: "काम।",
+    search: "खोजें",
+    all: "सभी",
+    empty: "कुछ नहीं मिला।",
+    sort: { featured: "फीचर्ड", newest: "नए", oldest: "पुराने" },
+  },
+  caseStudy: {
+    back: "सारा काम",
+    challenge: "समस्या",
+    solution: "समाधान",
+    delivered: "डिलीवर किया",
+    stack: "टेक",
+    live: "लाइव साइट देखें",
+    similar: "आपको भी चाहिए?",
+    next: "अगला",
+    prev: "पिछला",
+  },
+};
+
+export const TRANSLATIONS: Record<Language, Copy> = { en, hi };
