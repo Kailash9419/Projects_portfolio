@@ -1,12 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import ProjectCard from "./ProjectCard";
-import { getFeaturedProjects } from "@/lib/projects";
+import { readProjects } from "@/lib/server/projectStore";
 import SectionReveal from "@/components/ui/SectionReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
 
 export default async function FeaturedWork() {
-  const allFeatured = await getFeaturedProjects();
+  const allProjects = await readProjects();
+  const allFeatured = allProjects.filter((p) => p.featured);
   
   // Strictly filter only real, valid uploaded projects (no empty/blank ghost items)
   const projects = (allFeatured || []).filter(

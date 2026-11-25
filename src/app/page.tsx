@@ -1,4 +1,6 @@
 import Hero from "@/components/hero/Hero";
+
+export const dynamic = "force-dynamic";
 import BusinessSolutionFinder from "@/components/sections/BusinessSolutionFinder";
 import WhatWeBuild from "@/components/sections/WhatWeBuild";
 import FeaturedWork from "@/components/projects/FeaturedWork";

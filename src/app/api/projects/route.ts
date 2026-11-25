@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { readProjects, saveProject } from "@/lib/server/projectStore";
 import { checkAdminAuth } from "@/lib/server/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -32,6 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     const saved = await saveProject(body);
+    revalidatePath("/", "layout");
+    revalidatePath("/work");
+    revalidatePath(`/work/${saved.slug}`);
     return NextResponse.json({ success: true, project: saved });
   } catch (error) {
     return NextResponse.json(

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getAllProjects } from "@/lib/projects";
-import { ProjectCategory, SortOption, CATEGORY_FILTER_MAP } from "@/types/project";
+import { Project, ProjectCategory, SortOption, CATEGORY_FILTER_MAP } from "@/types/project";
 import ProjectGrid from "@/components/projects/ProjectGrid";
 import ProjectFilter from "@/components/projects/ProjectFilter";
 import ProjectSearch from "@/components/projects/ProjectSearch";
@@ -11,10 +11,21 @@ import GradientText from "@/components/ui/GradientText";
 import SectionReveal from "@/components/ui/SectionReveal";
 
 export default function WorkPage() {
-  const allProjects = useMemo(() => getAllProjects(), []);
+  const [allProjects, setAllProjects] = useState<Project[]>(() => getAllProjects());
   const [activeFilterKey, setActiveFilterKey] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("featured");
+
+  useEffect(() => {
+    fetch("/api/projects", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.success && Array.isArray(data.projects)) {
+          setAllProjects(data.projects);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Filter & Search & Sort pipeline
   const filteredProjects = useMemo(() => {

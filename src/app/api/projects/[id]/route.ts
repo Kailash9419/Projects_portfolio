@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { saveProject, deleteProject, toggleFeaturedProject } from "@/lib/server/projectStore";
 import { checkAdminAuth } from "@/lib/server/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function PUT(
   request: NextRequest,
@@ -16,6 +19,11 @@ export async function PUT(
   try {
     const body = await request.json();
     const updated = await saveProject({ ...body, id: params.id });
+    revalidatePath("/", "layout");
+    revalidatePath("/work");
+    revalidatePath(`/work/${updated.slug}`);
+    revalidatePath("/", "layout");
+    revalidatePath("/work");
     return NextResponse.json({ success: true, project: updated });
   } catch (error) {
     return NextResponse.json(
@@ -44,6 +52,8 @@ export async function PATCH(
         { status: 404 }
       );
     }
+    revalidatePath("/", "layout");
+    revalidatePath("/work");
     return NextResponse.json({ success: true, project: updated });
   } catch (error) {
     return NextResponse.json(
@@ -72,6 +82,8 @@ export async function DELETE(
         { status: 404 }
       );
     }
+    revalidatePath("/", "layout");
+    revalidatePath("/work");
     return NextResponse.json({ success: true, message: "Project deleted successfully" });
   } catch (error) {
     return NextResponse.json(

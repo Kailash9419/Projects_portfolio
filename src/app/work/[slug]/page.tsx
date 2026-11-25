@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllProjects, getProjectBySlug, getAdjacentProjects } from "@/lib/projects";
+import { readProjects } from "@/lib/server/projectStore";
 import TechBadge from "@/components/projects/TechBadge";
 import SectionReveal from "@/components/ui/SectionReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { CONTACT } from "@/data/brand";
+
+export const dynamic = "force-dynamic";
 
 interface ProjectPageProps {
   params: {
@@ -14,7 +16,7 @@ interface ProjectPageProps {
 }
 
 export async function generateStaticParams() {
-  const projects = getAllProjects();
+  const projects = await readProjects();
   return projects.map((p) => ({
     slug: p.slug,
   }));
@@ -23,7 +25,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
-  const project = getProjectBySlug(params.slug);
+  const projects = await readProjects();
+  const project = projects.find((p) => p.slug === params.slug);
   if (!project) {
     return {
       title: "Project Not Found | DevLabs",
@@ -36,14 +39,17 @@ export async function generateMetadata({
   };
 }
 
-export default function ProjectDetailPage({ params }: ProjectPageProps) {
-  const project = getProjectBySlug(params.slug);
+export default async function ProjectDetailPage({ params }: ProjectPageProps) {
+  const projects = await readProjects();
+  const index = projects.findIndex((p) => p.slug === params.slug);
+  const project = index !== -1 ? projects[index] : undefined;
 
   if (!project) {
     notFound();
   }
 
-  const { prev, next } = getAdjacentProjects(params.slug);
+  const prev = index > 0 ? projects[index - 1] : null;
+  const next = index < projects.length - 1 ? projects[index + 1] : null;
   const accentColor = project.accentColor || "#A3E635";
   const allMedia = [
     project.coverImage,

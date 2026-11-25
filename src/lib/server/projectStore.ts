@@ -28,9 +28,18 @@ export async function saveProject(projectData: Omit<Project, "id"> & { id?: stri
     if (index === -1) {
       throw new Error(`Project with ID ${projectData.id} not found`);
     }
+    const existing = list[index];
     const updated: Project = {
+      ...existing,
       ...(projectData as Project),
-      slug: projectData.slug || slugify(projectData.title),
+      id: existing.id,
+      slug: projectData.slug?.trim() || existing.slug || slugify(projectData.title || existing.title),
+      screenshots: Array.isArray(projectData.screenshots)
+        ? projectData.screenshots
+        : existing.screenshots || [],
+      technologies: Array.isArray(projectData.technologies)
+        ? projectData.technologies
+        : existing.technologies || [],
     };
     list[index] = updated;
     await writeProjects(list);
@@ -38,15 +47,20 @@ export async function saveProject(projectData: Omit<Project, "id"> & { id?: stri
   } else {
     // Create new
     const newId = String(Date.now());
+    const baseSlug = projectData.slug?.trim() || slugify(projectData.title);
+    const uniqueSlug = list.some((p) => p.slug === baseSlug)
+      ? `${baseSlug}-${newId.slice(-4)}`
+      : baseSlug;
+
     const newProject: Project = {
       ...projectData,
       id: newId,
-      slug: projectData.slug || slugify(projectData.title),
+      slug: uniqueSlug,
       year: projectData.year || new Date().getFullYear(),
       featured: projectData.featured ?? false,
       technologies: projectData.technologies || [],
       screenshots: projectData.screenshots || [],
-      coverImage: projectData.coverImage || "/placeholder-project.svg",
+      coverImage: projectData.coverImage || "",
     };
     list.unshift(newProject); // Add at beginning
     await writeProjects(list);
