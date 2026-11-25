@@ -82,17 +82,76 @@ export default function ProjectFormModal({
 
   if (!isOpen) return null;
 
+  // ─── Client-side image compression (Canvas API) ─────────────────────────
+  // Resizes & re-encodes the image so the resulting base64 stays well under
+  // Vercel's 4.5 MB serverless payload limit when the project JSON is saved.
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      // Skip compression for SVG (they are text, already small)
+      if (file.type === "image/svg+xml") {
+        resolve(file);
+        return;
+      }
+
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+
+        // Max dimensions: 1200×900 for cover, keeps quality fine for display
+        const MAX_W = 1200;
+        const MAX_H = 900;
+        let { width, height } = img;
+
+        if (width > MAX_W || height > MAX_H) {
+          const ratio = Math.min(MAX_W / width, MAX_H / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Encode as JPEG at 80% quality (~10× smaller than PNG)
+        const mimeOut = file.type === "image/png" ? "image/jpeg" : file.type;
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            const compressed = new File(
+              [blob],
+              file.name.replace(/\.(png|jpg|jpeg|webp|gif)$/i, ".jpg"),
+              { type: mimeOut }
+            );
+            resolve(compressed);
+          },
+          mimeOut,
+          0.8
+        );
+      };
+
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  };
+
   // File Upload Helper
   const handleFileUpload = async (
     file: File
   ): Promise<string> => {
-    // Check size (< 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error(`"${file.name}" is larger than 10MB`);
+    // Check raw size before compression (< 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      throw new Error(`"${file.name}" is larger than 20MB`);
     }
 
+    // Compress on client before sending — keeps payload well under Vercel 4.5MB limit
+    const compressed = await compressImage(file);
+
     const data = new FormData();
-    data.append("file", file);
+    data.append("file", compressed);
 
     const res = await fetch("/api/upload", {
       method: "POST",
