@@ -1,0 +1,53 @@
+---
+/**
+ * Art-directed screenshot: portrait phone shot on narrow screens, desktop shot elsewhere.
+ * AVIF + WebP with intrinsic sizes to prevent layout shift.
+ */
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+
+interface Props {
+  desktop: ImageMetadata;
+  mobile: ImageMetadata;
+  alt: string;
+  sizes: string;
+  /** Narrow breakpoint below which the phone shot is used. Omit to always use desktop. */
+  mobileMax?: number;
+  eager?: boolean;
+  class?: string;
+}
+const { desktop, mobile, alt, sizes, mobileMax, eager = false, class: className } = Astro.props;
+
+const fit = (list: number[], max: number) => {
+  const ok = list.filter((w) => w <= max);
+  return ok.length ? ok : [max];
+};
+const dWidths = fit([390, 480, 800, 1200, 1440], desktop.width);
+const mWidths = fit([390, 780], mobile.width);
+
+async function set(src: ImageMetadata, widths: number[], format: 'avif' | 'webp') {
+  const img = await getImage({ src, widths, format, quality: format === 'avif' ? 55 : 72 });
+  return img.srcSet.attribute;
+}
+const [dAvif, dWebp] = await Promise.all([set(desktop, dWidths, 'avif'), set(desktop, dWidths, 'webp')]);
+const [mAvif, mWebp] = mobileMax
+  ? await Promise.all([set(mobile, mWidths, 'avif'), set(mobile, mWidths, 'webp')])
+  : ['', ''];
+const fallback = await getImage({ src: desktop, width: Math.min(1200, desktop.width), format: 'webp', quality: 72 });
+const mq = mobileMax ? `(max-width: ${mobileMax}px)` : '';
+---
+<picture class={className}>
+  {mobileMax && <source media={mq} type="image/avif" srcset={mAvif} sizes="100vw" width={mobile.width} height={mobile.height} />}
+  {mobileMax && <source media={mq} type="image/webp" srcset={mWebp} sizes="100vw" width={mobile.width} height={mobile.height} />}
+  <source type="image/avif" srcset={dAvif} sizes={sizes} />
+  <source type="image/webp" srcset={dWebp} sizes={sizes} />
+  <img
+    src={fallback.src}
+    alt={alt}
+    width={desktop.width}
+    height={desktop.height}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+    fetchpriority={eager ? 'high' : 'auto'}
+  />
+</picture>

@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import { site } from '../content/site';
+---
+<BaseLayout locale="en" title="404 — DevLabs">
+  <section class="nf wrap">
+    <p class="eyebrow">404</p>
+    <h1 class="nf__title">{site.notFound.title.en}<span lang="hi-IN">{site.notFound.title.hi}</span></h1>
+    <p class="nf__links"><a class="btn btn--primary" href="/">{site.notFound.home.en}</a> <a class="btn" href="/hi/" lang="hi-IN">{site.notFound.home.hi}</a></p>
+  </section>
+</BaseLayout>
+<style>
+  .nf { min-height: 70svh; display: grid; align-content: center; gap: 1.5rem; }
+  .nf__title { font-size: var(--fs-h2); line-height: 1; letter-spacing: -0.04em; }
+  .nf__title span { display: block; color: var(--muted); font-family: var(--serif); letter-spacing: 0; margin-top: .3em; font-size: .6em; }
+  .nf__links { display: flex; gap: .75rem; flex-wrap: wrap; }
+</style>

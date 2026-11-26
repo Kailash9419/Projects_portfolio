@@ -1,0 +1,577 @@
+---
+import SectionHead from '../../components/SectionHead.astro';
+import type { Locale } from '../../content/types';
+import { site } from '../../content/site';
+import { t } from '../../lib/i18n';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const ph = site.phone;
+const u = ph.ui;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<section class="phone-sec" aria-labelledby="phone-title" data-phone-section>
+  <div class="wrap">
+    <SectionHead id="phone-title" label={t(ph.eyebrow, locale)} title={t(ph.title, locale)} />
+
+    <div class="phone-sec__body">
+      <div class="phone-sec__device">
+        <!--
+          Illustrated admin app. Decorative: the steps list carries the meaning.
+          data-screen (0–3) is set by phone.ts; each step changes the app state via CSS.
+        -->
+        <div class="phone" aria-hidden="true" data-phone data-screen="0">
+          <div class="app">
+            <div class="app__status"><span>9:41</span><span class="app__island"></span><span class="app__sig"><i></i><i></i><i></i></span></div>
+
+            <header class="app__head">
+              <div>
+                <small>{t(u.greeting, locale)}</small>
+                <b>{t(u.store, locale)}</b>
+              </div>
+              <span class="app__avatar">A</span>
+            </header>
+
+            <div class="app__stats">
+              <div>
+                <small>{t(u.today, locale)} · {t(u.orders, locale)}</small>
+                <b class="swap"><span class="v0">12</span><span class="v1">13</span></b>
+              </div>
+              <div>
+                <small>{t(u.revenue, locale)}</small>
+                <b class="swap"><span class="v0">₹18,420</span><span class="v1">₹19,660</span></b>
+              </div>
+            </div>
+
+            <p class="app__title">{t(u.recent, locale)}</p>
+            <ul class="app__list">
+              <li class="row row--new">
+                <span class="row__thumb row__thumb--a"></span>
+                <span class="row__text"><b>#1042 · ₹1,240</b><small>{t(u.handi, locale)}</small></span>
+                <span class="pill pill--new">{t(u.statusNew, locale)}</span>
+                <span class="pill pill--done">✓ {t(u.statusDelivered, locale)}</span>
+              </li>
+              <li class="row">
+                <span class="row__thumb row__thumb--b"></span>
+                <span class="row__text"><b>#1041 · ₹3,600</b><small>{t(u.mugs, locale)}</small></span>
+                <span class="pill">{t(u.statusPacked, locale)}</span>
+              </li>
+              <li class="row">
+                <span class="row__thumb row__thumb--c"></span>
+                <span class="row__text"><b>#1040 · ₹1,450</b><small>{t(u.kadhai, locale)}</small></span>
+                <span class="pill pill--ok">✓ {t(u.statusDelivered, locale)}</span>
+              </li>
+            </ul>
+
+            <nav class="app__tabs">
+              <span class="is-on"><i></i>{t(u.tabHome, locale)}</span>
+              <span><i></i>{t(u.tabProducts, locale)}</span>
+              <span><i></i>{t(u.tabCustomers, locale)}</span>
+            </nav>
+
+            <!-- Step 1: new-order notification -->
+            <div class="note note--order">
+              <span class="note__icon">₹</span>
+              <span><b>{t(u.banner, locale)}</b><small>{t(u.bannerFrom, locale)}</small></span>
+            </div>
+
+            <!-- Step 2: price edit sheet -->
+            <div class="sheet">
+              <span class="sheet__grip"></span>
+              <small>{t(u.editPrice, locale)}</small>
+              <div class="sheet__product">
+                <span class="row__thumb row__thumb--a"></span>
+                <b>{t(u.product, locale)}</b>
+              </div>
+              <div class="sheet__price"><s>₹680</s><span>₹620</span><i class="caret"></i></div>
+              <span class="sheet__save">{t(u.save, locale)}</span>
+            </div>
+
+            <!-- Step 3: WhatsApp confirmation -->
+            <div class="note note--wa">
+              <span class="note__icon note__icon--wa">✓</span>
+              <span><b>{t(u.waSent, locale)}</b><small>#1042 · {t(u.statusDelivered, locale)}</small></span>
+            </div>
+
+            <!-- Step 4: UPI payment -->
+            <div class="note note--upi">
+              <span class="note__icon note__icon--upi">₹</span>
+              <span><b>{t(u.upi, locale)}</b><small>{t(u.upiTo, locale)}</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ol class="phone-sec__steps" role="list">
+        {ph.steps.map((s, i) => (
+          <li class="step" data-step={i}>
+            <span class="num">{pad(i + 1)} / {pad(ph.steps.length)}</span>
+            <h3 class="step__title">{t(s.title, locale)}</h3>
+            <p class="step__line">{t(s.line, locale)}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initPhone } from './phone';
+  const sec = document.querySelector<HTMLElement>('[data-phone-section]');
+  if (sec) initPhone(sec);
+</script>
+
+<style>
+  .phone-sec {
+    padding-block: var(--section);
+  }
+  .phone-sec__body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    background:
+      radial-gradient(ellipse 55% 60% at 22% 50%, rgb(255 178 36 / 0.06), transparent 70%),
+      var(--surface);
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) * 2);
+    padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  }
+  .phone-sec__device {
+    grid-column: 1 / span 5;
+    position: sticky;
+    top: calc(var(--header-h) + (100svh - var(--header-h) - min(36rem, 72svh)) / 2);
+    height: fit-content;
+    display: grid;
+    place-items: center;
+    padding-block: 2rem;
+  }
+  .phone-sec__steps {
+    grid-column: 7 / -1;
+    padding-block: 8svh;
+  }
+  .step {
+    min-height: 40svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.6rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--line);
+    opacity: 0.32;
+    transition:
+      opacity var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .step.is-current {
+    border-left-color: var(--accent);
+  }
+  .step.is-current,
+  .phone-sec:not(.is-enhanced) .step {
+    opacity: 1;
+  }
+  .step__title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.4vw, 3.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  :lang(hi) .step__title {
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  .step__line {
+    color: var(--muted);
+    max-width: 30ch;
+    font-size: var(--fs-lede);
+  }
+
+  /* ================= Phone hardware ================= */
+  .phone {
+    --ui: #f7f4ee;
+    --ui-2: #ffffff;
+    --ui-ink: #191714;
+    --ui-muted: #7a7368;
+    --ui-line: #ebe5da;
+    position: relative;
+    width: min(17.5rem, 72vw);
+    height: min(36rem, 72svh);
+    padding: 0.55rem;
+    border-radius: 2.6rem;
+    background: #050505;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.14) inset,
+      0 0 0 5px #1b1a18,
+      0 50px 90px -30px rgb(0 0 0 / 0.85);
+    font-family: var(--sans);
+    color: var(--ui-ink);
+    font-size: 0.78rem;
+  }
+  .app {
+    position: relative;
+    height: 100%;
+    border-radius: 2.1rem;
+    background: var(--ui);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0.95rem;
+  }
+  .app small {
+    display: block;
+    color: var(--ui-muted);
+    font-size: 0.66rem;
+    line-height: 1.3;
+  }
+  .app b {
+    display: block;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .app__status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0.4rem 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+  .app__island {
+    width: 32%;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: #050505;
+  }
+  .app__sig {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+  }
+  .app__sig i {
+    width: 3px;
+    background: var(--ui-ink);
+    border-radius: 1px;
+  }
+  .app__sig i:nth-child(1) { height: 4px; }
+  .app__sig i:nth-child(2) { height: 6px; }
+  .app__sig i:nth-child(3) { height: 8px; }
+  .app__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 0.6rem 0.8rem;
+  }
+  .app__head b {
+    font-size: 1.05rem;
+  }
+  .app__avatar {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--ui-ink);
+    color: var(--ui);
+    font-weight: 600;
+  }
+  .app__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .app__stats > div {
+    padding: 0.7rem;
+    border-radius: 0.9rem;
+    background: var(--ui-2);
+    border: 1px solid var(--ui-line);
+    transition: box-shadow var(--dur) var(--ease);
+  }
+  .app__stats b {
+    font-size: 1.05rem;
+    margin-top: 0.15rem;
+  }
+  /* Values that change with the story: v0 before, v1 after. */
+  .swap {
+    display: grid !important;
+  }
+  .swap span {
+    grid-area: 1 / 1;
+    transition:
+      opacity var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .swap .v1 {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .app__title {
+    margin-top: 1rem;
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+  }
+  .app__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem;
+    border-radius: 0.8rem;
+    background: var(--ui-2);
+    border: 1px solid var(--ui-line);
+    transition: box-shadow var(--dur) var(--ease);
+  }
+  .row__thumb {
+    flex: none;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.55rem;
+  }
+  .row__thumb--a { background: radial-gradient(circle at 40% 35%, #e3905f, #a24c26); }
+  .row__thumb--b { background: radial-gradient(circle at 40% 35%, #d8a36b, #8a5427); }
+  .row__thumb--c { background: radial-gradient(circle at 40% 35%, #8d6e58, #3e2c20); }
+  .row__text {
+    flex: 1;
+    min-width: 0;
+  }
+  .row__text b {
+    font-size: 0.74rem;
+  }
+  .pill {
+    flex: none;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: #efe9de;
+    color: var(--ui-muted);
+  }
+  .pill--new {
+    background: #ffefcc;
+    color: #8a5a00;
+  }
+  .pill--ok,
+  .pill--done {
+    background: #dcf3e4;
+    color: #17703c;
+  }
+  .row--new .pill {
+    transition: opacity var(--dur) var(--ease);
+  }
+  .row--new .pill--done {
+    position: absolute;
+    right: 0.55rem;
+    opacity: 0;
+  }
+  .app__tabs {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-around;
+    padding: 0.6rem 0 0.9rem;
+    border-top: 1px solid var(--ui-line);
+    font-size: 0.6rem;
+    color: var(--ui-muted);
+  }
+  .app__tabs span {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+  }
+  .app__tabs i {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.3rem;
+    border: 1.5px solid currentColor;
+  }
+  .app__tabs .is-on {
+    color: var(--ui-ink);
+    font-weight: 600;
+  }
+
+  /* Overlays (notification banners + bottom sheet) */
+  .note {
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    top: 2.4rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.65rem 0.7rem;
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 0.94);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 14px 30px -12px rgb(0 0 0 / 0.35);
+    opacity: 0;
+    transform: translateY(-140%);
+    transition:
+      opacity var(--dur) var(--ease),
+      transform 600ms var(--ease);
+  }
+  .note b {
+    font-size: 0.74rem;
+  }
+  .note__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 0.55rem;
+    background: var(--accent);
+    color: #1a1203;
+    font-weight: 700;
+  }
+  .note__icon--wa { background: #25a35a; color: #fff; }
+  .note__icon--upi { background: #1f5f3f; color: #fff; }
+  .sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem 1.2rem;
+    border-radius: 1.4rem 1.4rem 0 0;
+    background: var(--ui-2);
+    box-shadow: 0 -20px 40px -20px rgb(0 0 0 / 0.35);
+    transform: translateY(105%);
+    transition: transform 600ms var(--ease);
+  }
+  .sheet__grip {
+    justify-self: center;
+    width: 2.2rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: var(--ui-line);
+  }
+  .sheet__product {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .sheet__price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid var(--accent);
+    border-radius: 0.8rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .sheet__price s {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ui-muted);
+  }
+  .caret {
+    width: 2px;
+    height: 1.15rem;
+    align-self: center;
+    background: var(--ui-ink);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  .sheet__save {
+    padding: 0.6rem;
+    border-radius: 999px;
+    background: var(--ui-ink);
+    color: var(--ui);
+    text-align: center;
+    font-weight: 600;
+  }
+
+  /* ================= Story states ================= */
+  /* 0: new order arrives */
+  .phone[data-screen='0'] .note--order { opacity: 1; transform: none; }
+  .phone[data-screen='0'] .row--new { box-shadow: 0 0 0 2px var(--accent); }
+  /* 1: change a price */
+  .phone[data-screen='1'] .sheet { transform: none; }
+  /* 2+: delivered */
+  .phone:is([data-screen='2'], [data-screen='3']) .row--new .pill--new { opacity: 0; }
+  .phone:is([data-screen='2'], [data-screen='3']) .row--new .pill--done { opacity: 1; }
+  .phone[data-screen='2'] .note--wa { opacity: 1; transform: none; }
+  /* The new order is already counted; revenue rises when the UPI payment lands (step 3). */
+  .phone .app__stats > div:first-child .v0 { opacity: 0; }
+  .phone .app__stats > div:first-child .v1 { opacity: 1; transform: none; }
+  .phone[data-screen='3'] .app__stats > div:last-child .v0 { opacity: 0; transform: translateY(-6px); }
+  .phone[data-screen='3'] .app__stats > div:last-child .v1 { opacity: 1; transform: none; }
+  .phone[data-screen='3'] .app__stats > div:last-child { box-shadow: 0 0 0 2px #25a35a; }
+  .phone[data-screen='3'] .note--upi { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .caret { animation: none; }
+  }
+
+  /* ================= Small screens ================= */
+  @media (max-width: 800px) {
+    .phone-sec__body {
+      grid-template-columns: minmax(0, 1fr);
+      padding-inline: 1rem;
+    }
+    .phone-sec__device,
+    .phone-sec__steps {
+      grid-area: 1 / 1;
+    }
+    .phone-sec__device {
+      top: calc(var(--header-h) + 0.75rem);
+      justify-self: end;
+      align-self: start;
+      z-index: 1;
+      padding-block: 1rem;
+    }
+    .phone-sec__steps {
+      padding-block: 3svh;
+      padding-right: calc(min(10.5rem, 44vw) + 0.75rem);
+    }
+    .phone {
+      width: min(10.5rem, 44vw);
+      height: auto;
+      aspect-ratio: 9 / 19;
+      padding: 0.35rem;
+      border-radius: 1.7rem;
+      font-size: 0.5rem;
+    }
+    .app {
+      border-radius: 1.4rem;
+      padding: 0 0.55rem;
+    }
+    .app small { font-size: 0.45rem; }
+    .app__status { font-size: 0.45rem; padding: 0.45rem 0.25rem 0.2rem; }
+    .app__island { height: 0.8rem; }
+    .app__head { padding-block: 0.3rem 0.45rem; }
+    .app__head b, .app__stats b { font-size: 0.68rem; }
+    .app__avatar { width: 1.3rem; height: 1.3rem; }
+    .app__stats > div { padding: 0.4rem; border-radius: 0.55rem; }
+    .app__title { margin-top: 0.55rem; margin-bottom: 0.3rem; }
+    .row { padding: 0.35rem; gap: 0.35rem; border-radius: 0.5rem; }
+    .row__thumb { width: 1.3rem; height: 1.3rem; border-radius: 0.35rem; }
+    .row__text b { font-size: 0.5rem; }
+    .pill { font-size: 0.42rem; padding: 0.1rem 0.3rem; }
+    .row--new .pill--done { right: 0.35rem; }
+    .app__tabs { font-size: 0.42rem; padding: 0.35rem 0 0.55rem; }
+    .app__tabs i { width: 0.65rem; height: 0.65rem; }
+    .note { top: 1.5rem; left: 0.35rem; right: 0.35rem; padding: 0.4rem; gap: 0.35rem; border-radius: 0.65rem; }
+    .note b { font-size: 0.5rem; }
+    .note__icon { width: 1.2rem; height: 1.2rem; border-radius: 0.35rem; }
+    .sheet { padding: 0.4rem 0.6rem 0.75rem; gap: 0.35rem; }
+    .sheet__price { font-size: 0.85rem; padding: 0.35rem 0.5rem; }
+    .sheet__price s { font-size: 0.55rem; }
+    .caret { height: 0.75rem; }
+    .sheet__save { padding: 0.35rem; }
+    .step {
+      min-height: 50svh;
+      padding-left: 0.9rem;
+    }
+    .step__title { font-size: 1.55rem; }
+    .step__line { font-size: 0.95rem; }
+  }
+</style>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://devlabs.studio/sitemap-index.xml

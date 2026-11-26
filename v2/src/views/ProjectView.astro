@@ -1,0 +1,302 @@
+---
+import { getImage } from 'astro:assets';
+import BaseLayout from '../components/BaseLayout.astro';
+import Shot from '../components/Shot.astro';
+import Icon from '../components/Icon.astro';
+import type { Locale, Project } from '../content/types';
+import { neighbours } from '../content/projects';
+import { contact, site } from '../content/site';
+import { localePath, t } from '../lib/i18n';
+import { whatsappLink } from '../lib/whatsapp';
+
+interface Props { locale: Locale; project: Project }
+const { locale, project: p } = Astro.props;
+const s = site.project;
+const { prev, next } = neighbours(p.slug);
+const og = await getImage({ src: p.cover, width: 1200, height: 750, format: 'jpg', quality: 78 });
+const host = new URL(p.liveUrl).host;
+const want = whatsappLink(
+  contact.phoneE164,
+  locale === 'hi'
+    ? `नमस्ते DevLabs! मुझे ${p.name} जैसा कुछ चाहिए।`
+    : `Hi DevLabs! I'd like something like ${p.name}.`,
+);
+const anyUnverified = p.metrics.some((m) => !m.verified);
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<BaseLayout
+  locale={locale}
+  title={`${p.name} — ${t(p.tagline, locale)} · DevLabs`}
+  description={t(p.summary, locale)}
+  ogImage={og.src}
+>
+  <article class="story">
+    <header class="wrap story__head">
+      <a class="story__back link-arrow" href={`${localePath(locale, '/')}#work`}><Icon name="arrow-left" />{t(s.back, locale)}</a>
+      <div class="grid story__meta">
+        <p class="label story__kind">{t(p.kind, locale)}</p>
+        <p class="label story__year">{p.year}</p>
+      </div>
+      <h1 class="display story__title" lang="en">{p.name}</h1>
+      <div class="grid story__intro">
+        <p class="lede story__tagline">{t(p.tagline, locale)}</p>
+        <div class="story__links">
+          {p.status === 'live' ? (
+            <a class="btn" href={p.liveUrl} target="_blank" rel="noopener" aria-label={`${t(s.visit, locale)}: ${host}`}>
+              {host}<Icon name="external" />
+            </a>
+          ) : (
+            <p class="story__offline" role="note">{t(s.offlineNote, locale)}</p>
+          )}
+        </div>
+      </div>
+    </header>
+
+    <figure class="wrap story__hero">
+      <Shot
+        desktop={p.cover}
+        mobile={p.coverMobile}
+        alt={t(p.coverAlt, locale)}
+        sizes="(max-width: 1408px) 92vw, 1296px"
+        eager
+      />
+    </figure>
+
+    <div class="wrap story__body">
+      <div class="grid row row--first">
+        <p class="h2 row__wide story__summary">{t(p.summary, locale)}</p>
+      </div>
+
+      {p.metrics.length > 0 && (
+        <section class="grid row" aria-labelledby="results">
+          <h2 id="results" class="label row__label">{t(s.results, locale)}</h2>
+          <div class="row__wide">
+            <dl class="metrics">
+              {p.metrics.map((m) => (
+                <div>
+                  <dt>{t(m.label, locale)}</dt>
+                  <dd>{m.value}</dd>
+                </div>
+              ))}
+            </dl>
+            {anyUnverified && <p class="story__note">{t(s.resultsNote, locale)}</p>}
+          </div>
+        </section>
+      )}
+
+      <section class="grid row">
+        <h2 class="label row__label">{t(s.problem, locale)}</h2>
+        <p class="row__text">{t(p.problem, locale)}</p>
+      </section>
+      <section class="grid row">
+        <h2 class="label row__label">{t(s.build, locale)}</h2>
+        <p class="row__text">{t(p.build, locale)}</p>
+      </section>
+
+      <section class="grid row">
+        <h2 class="label row__label">{t(s.delivered, locale)}</h2>
+        <div class="row__mid">
+          <ol class="delivered" role="list">
+            {p.delivered.map((d, i) => (
+              <li><span class="num">{pad(i + 1)}</span>{t(d, locale)}</li>
+            ))}
+          </ol>
+          <h3 class="label stack__title">{t(s.stack, locale)}</h3>
+          <ul class="stack" role="list">
+            {p.stack.map((x) => <li>{x}</li>)}
+          </ul>
+        </div>
+        <figure class="phone-shot">
+          <div class="phone-shot__frame">
+            <Shot desktop={p.coverMobile} mobile={p.coverMobile} alt={t(p.coverAlt, locale)} sizes="(max-width: 900px) 60vw, 280px" />
+          </div>
+          <figcaption class="label">{t(s.mobileView, locale)}</figcaption>
+        </figure>
+      </section>
+
+      <aside class="cta" aria-label={t(s.want, locale)}>
+        <p class="h2">{t(s.want, locale)}</p>
+        <a class="btn btn--primary" href={want} target="_blank" rel="noopener"><Icon name="whatsapp" />{t(site.hero.ctaPrimary, locale)}</a>
+      </aside>
+    </div>
+
+    <nav class="wrap pager" aria-label={`${t(s.prev, locale)} / ${t(s.next, locale)}`}>
+      <a href={localePath(locale, `/work/${prev.slug}/`)} rel="prev">
+        <span class="label">← {t(s.prev, locale)}</span><span class="pager__name">{prev.name}</span>
+      </a>
+      <a href={localePath(locale, `/work/${next.slug}/`)} rel="next" class="pager__next">
+        <span class="label">{t(s.next, locale)} →</span><span class="pager__name">{next.name}</span>
+      </a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .story__head {
+    padding-top: clamp(1.5rem, 4vw, 3rem);
+    padding-bottom: clamp(2rem, 4vw, 3rem);
+  }
+  .story__back {
+    color: var(--muted);
+    padding-block: 0.4rem;
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+  .story__back:hover { color: var(--text); }
+  .story__meta {
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+  .story__kind { grid-column: 1 / span 8; }
+  .story__year { grid-column: 9 / -1; text-align: right; }
+  .story__title {
+    margin-block: clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+    font-family: 'Instrument Serif', Georgia, serif;
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+  }
+  .story__intro {
+    row-gap: 1.25rem;
+    align-items: end;
+  }
+  .story__tagline { grid-column: 4 / span 6; }
+  .story__links {
+    grid-column: 10 / -1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .story__offline {
+    color: var(--muted);
+    font-size: var(--fs-small);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.85rem;
+    max-width: 34ch;
+  }
+  .story__hero :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    outline: 1px solid var(--line);
+    outline-offset: -1px;
+  }
+  .story__body {
+    padding-block: var(--section);
+  }
+  .row {
+    row-gap: 1rem;
+    padding-block: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .row--first { border-top: 0; padding-top: 0; }
+  .row__label { grid-column: 1 / span 3; }
+  .row__wide { grid-column: 4 / -1; }
+  .row__text {
+    grid-column: 4 / span 6;
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+  }
+  .row__mid { grid-column: 4 / span 5; }
+  .story__summary { max-width: 24ch; }
+  .metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem clamp(2.5rem, 7vw, 6rem);
+  }
+  .metrics div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.35rem;
+  }
+  .metrics dd {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+  .metrics dt { color: var(--muted); }
+  .story__note {
+    margin-top: 1.25rem;
+    color: var(--faint);
+    font-size: var(--fs-small);
+  }
+  .delivered li {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .delivered li:first-child { padding-top: 0; }
+  .stack__title { margin-top: 2.5rem; }
+  .stack {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .stack li {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: var(--fs-small);
+  }
+  .phone-shot {
+    grid-column: 10 / -1;
+    display: grid;
+    gap: 0.9rem;
+    justify-items: center;
+  }
+  .phone-shot__frame {
+    width: 100%;
+    max-width: 17rem;
+    padding: 0.5rem;
+    border-radius: 2.2rem;
+    background: #050505;
+    box-shadow: 0 0 0 1px var(--line-strong), 0 30px 60px -30px rgb(0 0 0 / 0.8);
+    overflow: hidden;
+  }
+  .phone-shot__frame :global(img) {
+    border-radius: 1.75rem;
+    width: 100%;
+    height: auto;
+  }
+  .cta {
+    margin-top: clamp(3rem, 6vw, 5rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: clamp(1.75rem, 4vw, 3rem);
+    border-radius: calc(var(--radius) * 2);
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--line);
+  }
+  .pager a {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+    text-decoration: none;
+  }
+  .pager__next { text-align: right; }
+  .pager__name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: var(--fs-h3);
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .pager a:hover .pager__name { color: var(--accent); }
+  @media (max-width: 900px) {
+    .story__tagline { grid-column: 1 / span 8; }
+    .story__links { grid-column: 9 / -1; }
+    .row__label, .row__wide, .row__text, .row__mid { grid-column: 1 / -1; }
+    .phone-shot { grid-column: 1 / -1; margin-top: 2rem; }
+  }
+  @media (max-width: 600px) {
+    .story__tagline, .story__links { grid-column: 1 / -1; justify-content: flex-start; }
+  }
+</style>
