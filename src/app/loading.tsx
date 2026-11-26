@@ -1,28 +1,11 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        {/* Animated dots loader */}
-        <div className="flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-3 h-3 rounded-full bg-accent-lime"
-              style={{
-                animation: `bounce 1.4s ease-in-out ${i * 0.16}s infinite both`,
-              }}
-            />
-          ))}
-        </div>
-        <span className="text-text-muted text-sm font-mono uppercase tracking-widest">
-          Loading
+    <div className="grid min-h-svh place-items-center bg-ink">
+      <div className="flex flex-col items-center gap-5">
+        <span className="relative block h-px w-40 overflow-hidden bg-line-strong">
+          <span className="absolute inset-y-0 left-0 w-1/3 animate-[marquee_1.1s_linear_infinite] bg-lime" />
         </span>
-        <style>{`
-          @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; }
-          }
-        `}</style>
+        <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-faint">Loading</span>
       </div>
     </div>
   );

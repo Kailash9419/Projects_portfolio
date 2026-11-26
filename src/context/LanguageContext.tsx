@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useSyncExternalStore } from "react";
+import React, { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { Language, TRANSLATIONS } from "@/data/translations";
 
 interface LanguageContextType {
@@ -49,6 +49,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
     listeners.forEach((l) => l());
   };
+
+  // Keep <html lang> in sync so screen readers and :lang(hi) styles follow the toggle.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const toggleLanguage = () => {
     const next = language === "en" ? "hi" : "en";

@@ -1,32 +1,24 @@
-import type { Metadata } from "next";
-import { Inter, Syne, Noto_Sans_Devanagari } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import InteractiveBackground from "@/components/ui/InteractiveBackground";
-import ScrollProgress from "@/components/ui/ScrollProgress";
-import FloatingSocialCTA from "@/components/ui/FloatingSocialCTA";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { SiteChrome } from "@/components/site/site-chrome";
 import { BRAND, SEO, LOCATION, CONTACT } from "@/data/brand";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-  display: "swap",
-});
-
+const display = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"], display: "swap" });
+const sans = Geist({ variable: "--font-geist", subsets: ["latin"], display: "swap" });
+const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 const devanagari = Noto_Sans_Devanagari({
   variable: "--font-devanagari",
-  subsets: ["devanagari", "latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["devanagari"],
+  weight: ["400", "500", "700", "800"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: "#050606",
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SEO.siteUrl),
@@ -84,31 +76,17 @@ const jsonLd = {
   image: `${SEO.siteUrl}/opengraph-image`,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${syne.variable} ${devanagari.variable}`}>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
-      <body
-        className="min-h-screen bg-bg-primary text-text-primary antialiased flex flex-col"
-        style={{ fontFamily: "var(--font-inter), var(--font-devanagari), system-ui, sans-serif" }}
-      >
+    <html
+      lang="en"
+      className={`${display.variable} ${sans.variable} ${mono.variable} ${devanagari.variable} dark`}
+      suppressHydrationWarning
+    >
+      <body className="grain min-h-svh">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <LanguageProvider>
-          <ScrollProgress />
-          <InteractiveBackground />
-          <div className="noise-overlay" />
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <FloatingSocialCTA />
+          <SiteChrome>{children}</SiteChrome>
         </LanguageProvider>
       </body>
     </html>

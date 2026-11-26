@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { getAllProjects } from "@/lib/projects";
-import WorkBrowser from "@/components/projects/WorkBrowser";
+import { WorkBrowser } from "@/components/work/work-browser";
 import { BRAND } from "@/data/brand";
 
 export const metadata: Metadata = {
   title: `All Projects | ${BRAND.name}`,
-  description: `SaaS platforms, websites and automation tools built by ${BRAND.fullName}.`,
+  description: `Stores, booking platforms, SaaS and websites built by ${BRAND.fullName}.`,
   alternates: { canonical: "/work" },
 };
 
