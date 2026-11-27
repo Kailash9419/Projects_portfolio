@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import Hero from '../features/hero/Hero.astro';
+import WorkSection from '../features/work/WorkSection.astro';
+import Services from '../components/Services.astro';
+import PhoneSection from '../features/phone/PhoneSection.astro';
+import Proof from '../components/Proof.astro';
+import ContactSection from '../features/contact/ContactSection.astro';
+import type { Locale } from '../content/types';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+---
+<BaseLayout locale={locale}>
+  <Hero locale={locale} />
+  <WorkSection locale={locale} />
+  <Services locale={locale} />
+  <PhoneSection locale={locale} />
+  <Proof locale={locale} />
+  <ContactSection locale={locale} />
+</BaseLayout>

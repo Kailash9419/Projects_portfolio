@@ -1,0 +1,430 @@
+---
+import Icon from '../../components/Icon.astro';
+import Shot from '../../components/Shot.astro';
+import type { Locale } from '../../content/types';
+import { projectsInOrder } from '../../content/projects';
+import { contact, site } from '../../content/site';
+import { localePath, t } from '../../lib/i18n';
+import { whatsappLink } from '../../lib/whatsapp';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const h = site.hero;
+const wa = whatsappLink(contact.phoneE164, `${t(site.contact.messageIntro, locale)} ${t(site.contact.messageDefault, locale)}`);
+// Only live sites appear in the hero: it is proof, so it must be real.
+const live = projectsInOrder.filter((p) => p.status === 'live');
+const SLIDE_MS = 5000;
+---
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero__inner">
+    <p class="label hero__eyebrow">{t(h.eyebrow, locale)}</p>
+
+    <div class="grid hero__main">
+      <h1 id="hero-title" class="display hero__title">
+        <span class="hero__mask"><span class="hero__line">{t(h.line1, locale)}</span></span>
+        <span class="hero__mask hero__mask--indent"><span class="hero__line accent">{t(h.line2, locale)}</span></span>
+      </h1>
+
+      <!--
+        Showcase (signature S1): live client sites in a browser + phone frame.
+        Baseline (no JS / reduced motion): first project shown, buttons still switch.
+      -->
+      <section class="showcase" aria-label={t(h.showcase, locale)} data-showcase style={`--slide-ms:${SLIDE_MS}ms`}>
+        <div class="showcase__stage">
+          {live.map((p, i) => (
+            <a
+              class:list={['slide', { 'is-on': i === 0 }]}
+              href={localePath(locale, `/work/${p.slug}/`)}
+              data-slide={i}
+              aria-hidden={i === 0 ? undefined : 'true'}
+              tabindex={i === 0 ? undefined : -1}
+            >
+              <div class="browser">
+                <div class="browser__bar" aria-hidden="true">
+                  <span class="browser__dots"><i></i><i></i><i></i></span>
+                  <span class="browser__url">{new URL(p.liveUrl).host}</span>
+                </div>
+                <Shot
+                  desktop={p.cover}
+                  mobile={p.coverMobile}
+                  alt={t(p.coverAlt, locale)}
+                  sizes="(max-width: 760px) 92vw, 46vw"
+                  eager={i === 0}
+                  class="browser__shot"
+                />
+              </div>
+              <div class="phone-frame" aria-hidden="true">
+                <Shot desktop={p.coverMobile} mobile={p.coverMobile} alt="" sizes="(max-width: 760px) 30vw, 13vw" eager={i === 0} />
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div class="showcase__bar">
+          <p class="showcase__caption" data-caption>
+            {live.map((p, i) => (
+              <span class:list={['cap', { 'is-on': i === 0 }]} data-cap={i}>
+                <span class="label">{t(h.showing, locale)}</span>
+                <span class="cap__name">{p.name}</span>
+                <span class="cap__kind">{t(p.kind, locale)}</span>
+              </span>
+            ))}
+          </p>
+          <div class="showcase__controls">
+            <div class="dots" role="group" aria-label={t(h.showcase, locale)}>
+              {live.map((p, i) => (
+                <button type="button" class="dot" data-goto={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`${t(h.show, locale)}: ${p.name}`}>
+                  <span class="dot__fill"></span>
+                </button>
+              ))}
+            </div>
+            <button type="button" class="toggle" data-toggle hidden aria-label={t(h.pause, locale)} data-label-pause={t(h.pause, locale)} data-label-play={t(h.play, locale)}>
+              <span class="toggle__pause"><Icon name="pause" /></span>
+              <span class="toggle__play"><Icon name="play" /></span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid hero__bottom">
+      <p class="lede hero__sub">{t(h.sub, locale)}</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href={wa} target="_blank" rel="noopener">
+          <Icon name="whatsapp" />{t(h.ctaPrimary, locale)}
+        </a>
+        <a class="btn" href="#work">{t(h.ctaSecondary, locale)}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initShowcase } from './showcase';
+  const el = document.querySelector<HTMLElement>('[data-showcase]');
+  if (el) initShowcase(el);
+</script>
+
+<style>
+  .hero {
+    min-height: calc(100svh - var(--header-h));
+    display: flex;
+  }
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: clamp(2rem, 4vh, 3rem);
+    padding-block: clamp(1.75rem, 4vh, 3rem) clamp(1.75rem, 5vh, 3rem);
+  }
+
+  /* ---------- Headline + showcase ---------- */
+  .hero__main {
+    align-items: center;
+    row-gap: 2.5rem;
+    flex: 1;
+  }
+  .hero__title {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+    display: grid;
+    font-size: clamp(3.4rem, 7.4vw, 8.4rem);
+    position: relative;
+    z-index: 1;
+  }
+  :lang(hi) .hero__title {
+    font-size: clamp(2.9rem, 6vw, 7rem);
+  }
+  .hero__mask {
+    display: block;
+    overflow: clip;
+    padding-block: 0.04em 0.12em;
+  }
+  .hero__mask--indent {
+    padding-left: 1.1em;
+  }
+  .hero__line {
+    display: block;
+    animation: rise var(--dur-slow) var(--ease) both;
+  }
+  .hero__mask--indent .hero__line {
+    animation-delay: 110ms;
+  }
+  @keyframes rise {
+    from { transform: translateY(105%); }
+  }
+
+  .showcase {
+    grid-column: 7 / -1;
+    grid-row: 1;
+    animation: fade 1.2s var(--ease) 250ms both;
+  }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(16px); }
+  }
+  .showcase__stage {
+    position: relative;
+    /* Browser is 16:10 plus a 2.25rem bar; extra room below for the phone overhang. */
+    aspect-ratio: 16 / 12;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 900ms var(--ease);
+  }
+  .slide.is-ready,
+  .slide.is-on {
+    display: block;
+  }
+  .slide.is-on {
+    opacity: 1;
+    z-index: 1;
+  }
+  .browser {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 88%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow:
+      0 0 0 1px var(--line-strong),
+      0 40px 80px -40px rgb(0 0 0 / 0.9);
+  }
+  .browser__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 2.25rem;
+    padding-inline: 0.85rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .browser__dots {
+    display: flex;
+    gap: 0.35rem;
+  }
+  .browser__dots i {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--line-strong);
+  }
+  .browser__url {
+    flex: 1;
+    max-width: 16rem;
+    margin-inline: auto;
+    padding: 0.15rem 0.75rem;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .browser :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    height: auto;
+    object-fit: cover;
+    object-position: top;
+  }
+  .phone-frame {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25%;
+    padding: 0.35rem;
+    border-radius: 1.4rem;
+    background: #050505;
+    box-shadow:
+      0 0 0 1px var(--line-strong),
+      0 30px 60px -20px rgb(0 0 0 / 0.95);
+    overflow: hidden;
+  }
+  .phone-frame :global(img) {
+    width: 100%;
+    aspect-ratio: 390 / 800;
+    height: auto;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 1.1rem;
+  }
+  @media (hover: hover) {
+    .slide .browser :global(img) {
+      transition: transform 1.2s var(--ease);
+    }
+    .slide:hover .browser :global(img) {
+      transform: scale(1.015);
+    }
+  }
+
+  /* ---------- Caption + controls ---------- */
+  .showcase__bar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    width: 88%;
+  }
+  .showcase__caption {
+    display: grid;
+    min-height: 3.4rem;
+  }
+  .cap {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    align-items: baseline;
+    column-gap: 0.75rem;
+    row-gap: 0.1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur) var(--ease), visibility var(--dur);
+  }
+  .cap.is-on {
+    opacity: 1;
+    visibility: visible;
+  }
+  .cap .label {
+    grid-column: 1 / -1;
+  }
+  .cap__name {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+  .cap__kind {
+    color: var(--muted);
+    font-size: var(--fs-small);
+  }
+  .showcase__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.2rem;
+  }
+  .dots {
+    display: flex;
+  }
+  .dot {
+    position: relative;
+    width: 2.25rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .dot::before,
+  .dot__fill {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    right: 0.25rem;
+    top: 50%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+  .dot__fill {
+    background: var(--text);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .dot[aria-pressed='true'] .dot__fill {
+    transform: scaleX(1);
+  }
+  /* While autoplaying, the active bar fills over the slide duration. JS listens for its end. */
+  .showcase.is-auto .dot[aria-pressed='true'] .dot__fill {
+    animation: fill var(--slide-ms) linear both;
+  }
+  .showcase.is-paused .dot[aria-pressed='true'] .dot__fill {
+    animation-play-state: paused;
+  }
+  @keyframes fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .toggle {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .toggle[hidden] {
+    display: none;
+  }
+  .toggle:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+  .toggle :global(svg) {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+  .toggle__play {
+    display: none;
+  }
+  .showcase.is-stopped .toggle__play {
+    display: block;
+  }
+  .showcase.is-stopped .toggle__pause {
+    display: none;
+  }
+
+  /* ---------- Bottom row ---------- */
+  .hero__bottom {
+    row-gap: 1.5rem;
+    align-items: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    animation: fade var(--dur-slow) var(--ease) 350ms both;
+  }
+  .hero__sub {
+    grid-column: 1 / span 6;
+  }
+  .hero__actions {
+    grid-column: 7 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 1100px) {
+    .hero__title { grid-column: 1 / -1; grid-row: 1; }
+    .showcase { grid-column: 3 / -1; grid-row: 2; }
+  }
+  @media (max-width: 760px) {
+    .hero { min-height: 0; }
+    .hero__inner { gap: 2rem; padding-block: 2rem 3rem; }
+    .hero__title { font-size: clamp(3.2rem, 15vw, 5rem); }
+    :lang(hi) .hero__title { font-size: clamp(2.6rem, 12vw, 4.2rem); }
+    .hero__mask--indent { padding-left: 0; }
+    .showcase { grid-column: 1 / -1; }
+    .showcase__bar { width: 100%; }
+    .cap { grid-template-columns: auto; }
+    .browser__bar { height: 1.75rem; gap: 0.5rem; padding-inline: 0.6rem; }
+    .browser__dots i { width: 0.4rem; height: 0.4rem; }
+    .browser__url { font-size: 0.62rem; padding-block: 0.05rem; }
+    .phone-frame { border-radius: 1rem; padding: 0.25rem; }
+    .phone-frame :global(img) { border-radius: 0.8rem; }
+    .hero__sub, .hero__actions { grid-column: 1 / -1; }
+    .hero__actions { justify-content: flex-start; }
+    .hero__actions .btn { flex: 1 1 auto; }
+  }
+</style>

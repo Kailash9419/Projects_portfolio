@@ -1,0 +1,99 @@
+---
+import SectionHead from './SectionHead.astro';
+import type { Locale } from '../content/types';
+import { site } from '../content/site';
+import { t } from '../lib/i18n';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const p = site.proof;
+const s = site.process;
+---
+<section class="section deal-sec" aria-labelledby="deal-title">
+  <div class="wrap">
+    <SectionHead id="deal-title" label={t(p.eyebrow, locale)} title={t(p.title, locale)} />
+
+    <dl class="deal grid">
+      {p.items.map((item) => (
+        <div class="deal__item" data-reveal>
+          <dt class="deal__label">{t(item.label, locale)}</dt>
+          <dd class="deal__value">{t(item.value, locale)}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <div class="grid process-wrap">
+      <h3 class="label process__label">{t(s.eyebrow, locale)}</h3>
+      <ol class="process" role="list">
+        {s.steps.map((step, i) => (
+          <li class="process__step" data-reveal>
+            <span class="num">{String(i + 1).padStart(2, '0')} · {t(step.when, locale)}</span>
+            <span class="process__what">{t(step.what, locale)}</span>
+            <span class="process__line">{t(step.line, locale)}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .deal-sec {
+    padding-bottom: calc(var(--section) * 0.6);
+  }
+  .deal {
+    row-gap: 2.5rem;
+  }
+  .deal__item {
+    grid-column: span 3;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line-strong);
+  }
+  .deal__value {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+  :lang(hi) .deal__value { letter-spacing: 0; }
+  .deal__label {
+    color: var(--muted);
+  }
+  .process-wrap {
+    margin-top: clamp(4.5rem, 9vw, 7.5rem);
+    row-gap: 1.5rem;
+  }
+  .process__label {
+    grid-column: 1 / span 3;
+  }
+  .process {
+    grid-column: 4 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+  .process__step {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+  .process__what {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+    line-height: 1.1;
+  }
+  .process__line {
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 22ch;
+  }
+  @media (max-width: 900px) {
+    .deal__item { grid-column: span 6; }
+    .process__label, .process { grid-column: 1 / -1; }
+    .process { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2rem; }
+  }
+</style>

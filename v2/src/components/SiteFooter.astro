@@ -1,0 +1,57 @@
+---
+import type { Locale } from '../content/types';
+import { contact, site } from '../content/site';
+import { t } from '../lib/i18n';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="wrap grid footer__inner">
+    <p class="footer__brand">DevLabs<span aria-hidden="true">.</span></p>
+    <ul class="footer__links" role="list">
+      <li><a href={`mailto:${contact.email}`}>{contact.email}</a></li>
+      <li><a href={`tel:+${contact.phoneE164}`}>{contact.phoneDisplay}</a></li>
+      <li><a href={contact.instagram} rel="noopener" target="_blank">Instagram</a></li>
+    </ul>
+    <p class="footer__meta">© {year} {t(site.footer.rights, locale)}<br />{t(contact.city, locale)} · {t(site.footer.made, locale)}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-block: clamp(3rem, 6vw, 4.5rem) 2.5rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .footer__inner {
+    row-gap: 2rem;
+    align-items: start;
+  }
+  .footer__brand {
+    grid-column: 1 / span 3;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    font-size: 1.1rem;
+  }
+  .footer__brand span { color: var(--accent); }
+  .footer__links {
+    grid-column: 4 / span 5;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .footer__links a {
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .footer__links a:hover { color: var(--text); }
+  .footer__meta {
+    grid-column: 9 / -1;
+    text-align: right;
+  }
+  @media (max-width: 760px) {
+    .footer__brand, .footer__links, .footer__meta { grid-column: 1 / -1; text-align: left; }
+  }
+</style>

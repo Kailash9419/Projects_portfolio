@@ -1,0 +1,79 @@
+---
+import type { Locale } from '../content/types';
+import { contact, site } from '../content/site';
+import { localePath, neutralPath, otherLocale, t } from '../lib/i18n';
+import { whatsappLink } from '../lib/whatsapp';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const other = otherLocale(locale);
+const otherLang = other === 'hi' ? 'hi-IN' : 'en-IN';
+const switchHref = localePath(other, neutralPath(Astro.url.pathname));
+const home = localePath(locale, '/');
+const wa = whatsappLink(contact.phoneE164, `${t(site.contact.messageIntro, locale)} ${t(site.contact.messageDefault, locale)}`);
+---
+<header class="header">
+  <div class="wrap header__inner">
+    <a class="wordmark" href={home} aria-label="DevLabs home">DevLabs<span aria-hidden="true">.</span></a>
+    <nav class="nav" aria-label={t(site.nav.label, locale)}>
+      <a class="nav__link nav__link--hide" href={`${home}#work`}>{t(site.nav.work, locale)}</a>
+      <a class="nav__link nav__link--hide" href={`${home}#contact`}>{t(site.nav.contact, locale)}</a>
+      <a class="nav__link" href={switchHref} hreflang={otherLang} lang={otherLang} aria-label={t(site.nav.switchLabel, locale)}>{t(site.nav.switchTo, locale)}</a>
+      <a class="btn nav__cta" href={wa} rel="noopener" target="_blank">{t(site.nav.talk, locale)}</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--header-h);
+    background: rgb(12 12 11 / 0.8);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border-bottom: 1px solid var(--line);
+  }
+  .header__inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: 'Inter Tight Variable', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+  }
+  .wordmark span {
+    color: var(--accent);
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 2.5vw, 2.25rem);
+  }
+  .nav__link {
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--muted);
+    padding-block: 0.5rem;
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .nav__link:hover {
+    color: var(--text);
+  }
+  .nav__cta {
+    min-height: 2.4rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+  }
+  @media (max-width: 640px) {
+    .nav__link--hide {
+      display: none;
+    }
+  }
+</style>

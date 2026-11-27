@@ -1,0 +1,360 @@
+---
+import { getImage } from 'astro:assets';
+import Shot from '../../components/Shot.astro';
+import Icon from '../../components/Icon.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import type { Locale } from '../../content/types';
+import { projectsInOrder } from '../../content/projects';
+import { site } from '../../content/site';
+import { localePath, t } from '../../lib/i18n';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const w = site.work;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Slice sources for the 3D wall (chosen at runtime by rendered size × DPR).
+const items = await Promise.all(
+  projectsInOrder.map(async (p) => {
+    const srcs = await Promise.all(
+      [800, 1200, 1440].map(async (width) => {
+        const img = await getImage({ src: p.detail, width, format: 'webp', quality: 76 });
+        return { w: width, src: img.src };
+      }),
+    );
+    return { p, srcs: JSON.stringify(srcs) };
+  }),
+);
+---
+<section id="work" class="work" aria-labelledby="work-title" data-work data-mode="static">
+  <div class="wrap">
+    <SectionHead id="work-title" label={t(w.eyebrow, locale)} count={pad(items.length)} title={t(w.title, locale)} />
+  </div>
+
+  <div class="work__scroll" data-work-scroll>
+    <div class="work__stage" data-work-stage>
+      <div class="work__view" aria-hidden="true" data-drum-view></div>
+
+      <div class="work__bar">
+        <div class="work__switcher" role="group" aria-label={t(w.switcher, locale)} data-switcher hidden>
+          {projectsInOrder.map((p, i) => (
+            <button type="button" class="work__dot" data-goto={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+              <span class="num">{pad(i + 1)}</span>
+              <span class="work__dot-name">{p.name}</span>
+            </button>
+          ))}
+        </div>
+
+        <ol class="work__track" role="list" data-track>
+          {items.map(({ p, srcs }, i) => (
+            <li class="work__item" data-index={i} data-wall-srcs={srcs}>
+              <article class="card" aria-labelledby={`card-${p.slug}`}>
+                <a class="card__link" href={localePath(locale, `/work/${p.slug}/`)}>
+                  <div class="card__media">
+                    <Shot
+                      desktop={p.detail}
+                      mobile={p.coverMobile}
+                      alt={t(p.detailAlt, locale)}
+                      sizes="(max-width: 760px) 80vw, (max-width: 1400px) 44vw, 640px"
+                    />
+                    {p.status === 'offline' && <span class="card__badge">{t(w.offline, locale)}</span>}
+                  </div>
+                  <div class="card__meta">
+                    <span class="num card__num">{pad(i + 1)}</span>
+                    <h3 id={`card-${p.slug}`} class="card__title">{p.name}</h3>
+                    <p class="card__kind">{t(p.kind, locale)} · {p.year}</p>
+                    <p class="card__tagline">{t(p.tagline, locale)}</p>
+                    <span class="card__open link-arrow">{t(w.open, locale)}<Icon name="arrow" /></span>
+                  </div>
+                </a>
+              </article>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initWorkWall } from './work-wall';
+  const root = document.querySelector<HTMLElement>('[data-work]');
+  if (root) initWorkWall(root);
+</script>
+
+<style>
+  .work {
+    padding-top: var(--section);
+  }
+
+  /* ================= Baseline: staggered editorial grid ================= */
+  .work__bar {
+    width: 100%;
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  .work__track {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: clamp(3rem, 6vw, 5rem);
+    padding-bottom: var(--section);
+  }
+  .work__item:nth-child(even) {
+    margin-top: clamp(4rem, 10vw, 9rem);
+  }
+  .card__link {
+    display: block;
+    text-decoration: none;
+  }
+  .card__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    outline: 1px solid var(--line);
+    outline-offset: -1px;
+  }
+  .card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 1.2s var(--ease);
+  }
+  @media (hover: hover) {
+    .card__link:hover .card__media :global(img) {
+      transform: scale(1.025);
+    }
+  }
+  .card__badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: rgb(12 12 11 / 0.8);
+    backdrop-filter: blur(8px);
+    font-size: var(--fs-small);
+  }
+  .card__meta {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 0.75rem;
+    row-gap: 0.15rem;
+    padding-top: 1.1rem;
+  }
+  .card__title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+  .card__kind {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    text-align: right;
+  }
+  .card__tagline {
+    grid-column: 2 / -1;
+    color: var(--muted);
+  }
+  .card__open {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .work__track {
+      grid-template-columns: 1fr;
+    }
+    .work__item:nth-child(even) {
+      margin-top: 0;
+    }
+    .card__media {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  /* ================= Swipe mode (touch / narrow) ================= */
+  .work[data-mode='swipe'] .work__bar {
+    max-width: none;
+    padding-inline: 0;
+  }
+  .work[data-mode='swipe'] .work__track {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-inline: 10vw;
+    perspective: 1000px;
+  }
+  .work[data-mode='swipe'] .work__track::-webkit-scrollbar {
+    display: none;
+  }
+  .work[data-mode='swipe'] .work__item {
+    flex: 0 0 80vw;
+    max-width: 24rem;
+    margin-top: 0;
+    scroll-snap-align: center;
+  }
+  .work[data-mode='swipe'] .card__media {
+    aspect-ratio: 4 / 5;
+  }
+  .work[data-mode='swipe'] .card__media :global(img) {
+    object-position: center;
+  }
+  .work[data-mode='swipe'] .card__meta {
+    opacity: var(--caption, 1);
+  }
+
+  /* ================= Drum mode (desktop) ================= */
+  .work__view {
+    display: none;
+  }
+  .work[data-mode='drum'] .work__stage {
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100svh - var(--header-h));
+    overflow: clip;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .work[data-mode='drum'] .work__view {
+    display: block;
+    position: relative;
+    cursor: pointer;
+  }
+  .work[data-mode='drum'] .work__bar {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    align-items: start;
+    padding-block: 1.25rem 2rem;
+    position: relative;
+  }
+  .work[data-mode='drum'] .work__bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--gutter);
+    right: var(--gutter);
+    border-top: 1px solid var(--line);
+  }
+  .work[data-mode='drum'] .work__switcher:not([hidden]) {
+    grid-column: 1 / span 3;
+    display: grid;
+    gap: 0.1rem;
+  }
+  .work[data-mode='drum'] .work__track {
+    grid-column: 4 / -1;
+    display: grid;
+    grid-template-columns: 1fr;
+    padding-bottom: 0;
+  }
+  .work[data-mode='drum'] .work__item {
+    grid-area: 1 / 1;
+    margin-top: 0;
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+    pointer-events: none;
+  }
+  .work[data-mode='drum'] .work__item.is-active,
+  .work[data-mode='drum'] .work__item:focus-within {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .work[data-mode='drum'] .card__media,
+  .work[data-mode='drum'] .card__num {
+    display: none;
+  }
+  .work[data-mode='drum'] .card__meta {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-top: 0;
+    row-gap: 0.3rem;
+  }
+  .work[data-mode='drum'] .card__title {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 2.6vw, 2.4rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .work[data-mode='drum'] .card__kind {
+    grid-row: 2;
+    grid-column: 1;
+    text-align: left;
+  }
+  .work[data-mode='drum'] .card__tagline {
+    display: none;
+  }
+  .work[data-mode='drum'] .card__open {
+    display: inline-flex;
+    grid-row: 1;
+    grid-column: 2;
+    align-self: center;
+    color: var(--text);
+  }
+  .work__switcher {
+    display: none;
+  }
+  .work__dot {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    background: none;
+    border: 0;
+    padding: 0.2rem 0;
+    cursor: pointer;
+    color: var(--faint);
+    text-align: left;
+    font-size: 0.9rem;
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .work__dot:hover,
+  .work__dot[aria-pressed='true'] {
+    color: var(--text);
+  }
+  .work__dot[aria-pressed='true'] .num {
+    color: var(--accent);
+  }
+
+  /* Generated wall DOM (created by work-wall.ts) */
+  .work__view :global(.drum) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+  }
+  .work__view :global(.drum-card) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-style: preserve-3d;
+  }
+  .work__view :global(.drum-slice) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    backface-visibility: hidden;
+    background-repeat: no-repeat;
+    background-color: var(--surface);
+  }
+  /* Panels not in front are dimmed (a gradient layer, since filter would flatten 3D). */
+  @property --dim {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.55;
+  }
+  .work__view :global(.drum-card) {
+    --dim: 0.55;
+    transition: --dim var(--dur) var(--ease);
+  }
+  .work__view :global(.drum-card.is-front) {
+    --dim: 0;
+  }
+</style>

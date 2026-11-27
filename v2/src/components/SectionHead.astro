@@ -1,0 +1,15 @@
+---
+/** The one section-header pattern used everywhere: label left (cols 1–3), title right (cols 4–12). */
+interface Props {
+  label: string;
+  title?: string;
+  id: string;
+  count?: string;
+}
+const { label, title, id, count } = Astro.props;
+---
+<header class="sec-head grid" data-reveal>
+  <p class="sec-head__label label">{label}{count && <span class="num"> ({count})</span>}</p>
+  {title && <h2 id={id} class="sec-head__title h2">{title}</h2>}
+  {Astro.slots.has('default') && <div class="sec-head__side"><slot /></div>}
+</header>

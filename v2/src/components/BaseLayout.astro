@@ -1,0 +1,66 @@
+---
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+import '@fontsource-variable/inter-tight';
+import '@fontsource/tiro-devanagari-hindi/400.css';
+import '@fontsource/mukta/400.css';
+import '@fontsource/mukta/500.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import SiteHeader from './SiteHeader.astro';
+import SiteFooter from './SiteFooter.astro';
+import type { Locale } from '../content/types';
+import { site } from '../content/site';
+import { htmlLang, localePath, neutralPath, t } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+const { locale, title, description, ogImage } = Astro.props;
+const pageTitle = title ?? t(site.meta.title, locale);
+const pageDesc = description ?? t(site.meta.description, locale);
+const neutral = neutralPath(Astro.url.pathname);
+const canonical = new URL(localePath(locale, neutral), Astro.site);
+const altEn = new URL(localePath('en', neutral), Astro.site);
+const altHi = new URL(localePath('hi', neutral), Astro.site);
+const og = ogImage ? new URL(ogImage, Astro.site) : undefined;
+---
+<!doctype html>
+<html lang={htmlLang[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDesc} />
+    <meta name="theme-color" content="#0c0c0b" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en-IN" href={altEn} />
+    <link rel="alternate" hreflang="hi-IN" href={altHi} />
+    <link rel="alternate" hreflang="x-default" href={altEn} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DevLabs" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDesc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === 'en' ? 'en_IN' : 'hi_IN'} />
+    {og && <meta property="og:image" content={og} />}
+    <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t(site.skip, locale)}</a>
+    <SiteHeader locale={locale} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter locale={locale} />
+    <script>
+      import { initReveals } from '../runtime/reveal';
+      initReveals();
+    </script>
+  </body>
+</html>

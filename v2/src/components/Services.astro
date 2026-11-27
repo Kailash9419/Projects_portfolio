@@ -1,0 +1,190 @@
+---
+import { getImage } from 'astro:assets';
+import SectionHead from './SectionHead.astro';
+import Icon from './Icon.astro';
+import type { Locale } from '../content/types';
+import { getProject } from '../content/projects';
+import { site } from '../content/site';
+import { localePath, t } from '../lib/i18n';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const s = site.services;
+
+const rows = s.items.map((item) => ({
+  ...item,
+  linked: item.projects.map((slug) => getProject(slug)).filter((p) => p !== undefined),
+}));
+// One hover preview per project that leads a row (loaded only when first shown).
+const previewSlugs = [...new Set(rows.map((r) => r.linked[0]?.slug).filter(Boolean))] as string[];
+const previews = await Promise.all(
+  previewSlugs.map(async (slug) => {
+    const p = getProject(slug)!;
+    const img = await getImage({ src: p.cover, width: 640, format: 'webp', quality: 74 });
+    return { slug, src: img.src };
+  }),
+);
+---
+<section class="section svc-sec" aria-labelledby="services-title" data-services>
+  <div class="wrap">
+    <SectionHead id="services-title" label={t(s.eyebrow, locale)} title={t(s.title, locale)} />
+    <ul class="svc" role="list">
+      {rows.map((row, i) => (
+        <li class="svc__row grid" data-reveal data-preview={row.linked[0]?.slug}>
+          <span class="num svc__num">{String(i + 1).padStart(2, '0')}</span>
+          <h3 class="svc__name">{t(row.name, locale)}</h3>
+          <div class="svc__side">
+            <p class="svc__line">{t(row.line, locale)}</p>
+            {row.linked.length > 0 && (
+              <p class="svc__seen">
+                <span class="label">{t(s.seenIn, locale)}</span>
+                {row.linked.map((p) => (
+                  <a class="svc__link" href={localePath(locale, `/work/${p.slug}/`)}>{p.name}<Icon name="arrow" /></a>
+                ))}
+              </p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- Pointer-following preview (fine pointer + motion allowed only). Decorative. -->
+  <div class="svc__preview" aria-hidden="true" data-preview-box>
+    {previews.map((p) => (
+      <img src={p.src} alt="" width="640" height="400" loading="lazy" decoding="async" data-preview-img={p.slug} />
+    ))}
+  </div>
+</section>
+
+<script>
+  import { initServicePreview } from '../features/services/preview';
+  const el = document.querySelector<HTMLElement>('[data-services]');
+  if (el) initServicePreview(el);
+</script>
+
+<style>
+  .svc-sec {
+    position: relative;
+  }
+  .svc {
+    border-bottom: 1px solid var(--line);
+  }
+  .svc__row {
+    position: relative;
+    align-items: baseline;
+    row-gap: 0.75rem;
+    padding-block: clamp(1.4rem, 2.6vw, 2.1rem);
+    border-top: 1px solid var(--line);
+  }
+  .svc__num {
+    grid-column: 1 / span 3;
+  }
+  .svc__name {
+    grid-column: 4 / span 5;
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.6vw, 3.3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    transition:
+      color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  :lang(hi) .svc__name {
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  .svc__side {
+    grid-column: 9 / -1;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .svc__line {
+    color: var(--text);
+  }
+  .svc__seen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1rem;
+    font-size: 0.9rem;
+  }
+  .svc__seen .label {
+    font-size: 0.72rem;
+    color: var(--faint);
+  }
+  .svc__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--muted);
+    text-decoration: none;
+    padding-block: 0.2rem;
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .svc__link :global(svg) {
+    width: 0.8rem;
+    height: 0.8rem;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+  .svc__link:hover {
+    color: var(--accent);
+  }
+  .svc__link:hover :global(svg) {
+    transform: translateX(2px);
+  }
+  @media (hover: hover) {
+    .svc__row:hover .svc__name {
+      color: var(--accent);
+      transform: translateX(0.4rem);
+    }
+  }
+
+  /* Preview card that follows the pointer (JS positions it; hidden otherwise). */
+  .svc__preview {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 5;
+    width: min(22rem, 26vw);
+    aspect-ratio: 16 / 10;
+    border-radius: 12px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(var(--px, -999px), var(--py, -999px), 0);
+    scale: 0.92;
+    transition:
+      opacity 300ms var(--ease),
+      scale 300ms var(--ease);
+    box-shadow:
+      0 0 0 1px var(--line-strong),
+      0 30px 60px -20px rgb(0 0 0 / 0.9);
+    display: none;
+  }
+  .svc__preview.is-enabled {
+    display: block;
+  }
+  .svc__preview.is-on {
+    opacity: 1;
+    scale: 1;
+  }
+  .svc__preview img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: none;
+  }
+  .svc__preview img.is-on {
+    display: block;
+  }
+
+  @media (max-width: 760px) {
+    .svc__num { grid-column: 1 / span 2; }
+    .svc__name { grid-column: 3 / -1; }
+    .svc__side { grid-column: 3 / -1; }
+  }
+</style>
